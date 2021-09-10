@@ -440,6 +440,50 @@ typedef struct ExtendedBlockFields_\
 } ExtendedBlockFields;";
     }
 
+    FFI_EXPORT(ExtendedPlayerPhysics*) LunaLuaGetCharacterPhysics() {
+        return Player::GetPhysicsForChar(0);
+    }
+
+    FFI_EXPORT(const char*) LunaLuaGetPlayerPhysicsStructs() {
+        return "\
+#pragma pack(push, 4)\
+struct PlayerPhysics {\
+    short jumpHeight;\
+    short blockJumpHeight;\
+    short headJumpHeight;\
+    short npcJumpheight;\
+    short springJumpHeight;\
+    float jumpVelocity;\
+    float runSpeed;\
+    float walkSpeed;\
+    short terminalVelocity;\
+    float gravity;\
+};\
+#pragma pack(pop)\
+\
+struct ExtendedPlayerPhysics {\
+    PlayerPhysics physics;\
+    short spinjumpHeight;\
+    short shellJumpHeight;\
+    short blockSpinjumpHeight;\
+    short headSpinjumpHeight;\
+    short npcSpinjumpHeight;\
+    short springSpinjumpHeight;\
+};";
+    }
+
+    FFI_EXPORT(ExtendedPlayerFields*) LunaLuaGetPlayerExtendedFieldsArray() {
+        return Player::GetExtended(0);
+    }
+
+    FFI_EXPORT(const char*) LunaLuaGetPlayerExtendedFieldsStruct() {
+        return "\
+struct ExtendedPlayerFields {\
+    ExtendedPlayerPhysics extPhysics;\
+    unsigned short overridenFields;\
+};";
+    }
+
     FFI_EXPORT(void) LunaLuaSetPlayerFilterBounceFix(bool enable)
     {
         gDisablePlayerFilterBounceFix = !enable;

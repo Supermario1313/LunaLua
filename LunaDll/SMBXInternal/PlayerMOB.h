@@ -72,7 +72,7 @@
 //+0x60		w	= Has jumped
 //+0x62		w	= Unknown62
 
-// - MOUNT 
+// - MOUNT
 //+0x64		w	= Yoshi has earthquake (yellow shell)
 //+0x66		w	= Yoshi has flight (blue shell)
 //+0x68		w	= Yoshi has fire breath (red shell)
@@ -103,7 +103,7 @@
 
 //+0xF0		w	= Player identity index (0 = nothing! don't use, 1 = demo, 2 = iris, 3 = princess, 5 = sheath)
 
-/// - KEYS - 
+/// - KEYS -
 //+0xF2		w	= U key pressing
 //+0xF4		w	= D key pressing
 //+0xF6		w	= L key pressing
@@ -186,7 +186,7 @@
 //+0x176	w	= Index of sprite being stood on
 //+0x178	w	= Unknown X momentum with sprites
 
-//+0x17A	w	= Usually forced to -1	
+//+0x17A	w	= Usually forced to -1
 //+0x17C	w	= Unused17C
 //+0x17E	w	= Unused17E
 //+0x180	w	= Unused180
@@ -246,7 +246,7 @@ struct PlayerMOB {
     short TanookiStatueActive;
     short TanookiMorphCooldown;
     short TanookiActiveFrameCount;
-    
+
     short IsSpinjumping;                // +0x50
     short SpinjumpStateCounter;
     short SpinjumpLandDirection;        // (will face this direction when landing)
@@ -256,7 +256,7 @@ struct PlayerMOB {
     short NearbyWarpIndex;              // Index of intersecting warp entrance
     short Unknown5C;
     short Unknown5E;
-    
+
     short HasJumped;                    // +0x60
 
     short Unknown62;
@@ -373,7 +373,36 @@ struct PlayerMOB {
 
 
 };
+
+struct PlayerPhysics {
+    short jumpHeight;
+    short blockJumpHeight;
+    short headJumpHeight;
+    short npcJumpheight;
+    short springJumpHeight;
+    float jumpVelocity;
+    float runSpeed;
+    float walkSpeed;
+    short terminalVelocity;
+    float gravity;
+};
+
 #pragma pack(pop)
+
+struct ExtendedPlayerPhysics {
+    PlayerPhysics physics;
+    short spinjumpHeight;
+    short shellJumpHeight;
+    short blockSpinjumpHeight;
+    short headSpinjumpHeight;
+    short npcSpinjumpHeight;
+    short springSpinjumpHeight;
+};
+
+struct ExtendedPlayerFields {
+    ExtendedPlayerPhysics extPhysics;
+    unsigned short overridenFields;
+};
 
 /* Verify struct is correctly sized, and also verify that a sampling of fields
  * that errors in would indicate a problem */
@@ -391,6 +420,7 @@ namespace Player {
 
     // PLAYER ACCESS -- (Currently only returns the ptr to the main player)
     PlayerMOB* Get(int player);
+    int GetIdx(PlayerMOB *player);
 
     // PLAYER MANAGEMENT
     bool InternalSwap(int player1, int player2); // swaps position of two players in the object list
@@ -434,6 +464,14 @@ namespace Player {
     void Kill(short index);
 
     RECT GetScreenPosition(PlayerMOB* player);
+
+    // PHYSICS
+    extern PlayerPhysics &ogPhysics;
+    ExtendedPlayerPhysics *GetPhysicsForChar(int character);
+
+    // EXTENDED FIELDS
+    ExtendedPlayerFields *GetExtended(int index);
+    void ClearExtendedFields();
 };
 
 #endif

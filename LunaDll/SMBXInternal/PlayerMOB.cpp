@@ -8,10 +8,23 @@ PlayerMOB* Player::Get(int index) {
     return PlayerMOB::Get(index);
 }
 
+int Player::GetIdx(PlayerMOB *player) {
+    int idx = ((PlayerMOB*)GM_PLAYERS_PTR - player) / sizeof(PlayerMOB);
+
+    if (0 <= idx && idx <= 200) return idx;
+
+    idx = ((PlayerMOB*)GM_PLAYERS_TEMPLATE - player) / sizeof(PlayerMOB);
+
+    if (0 <= idx && idx <= 10) return idx + 1000;
+
+    return -1;
+}
+
 
 // MANAGEMENT
 bool Player::InternalSwap(int player1, int player2) {
     char temp[500];
+    ExtendedPlayerFields tempFields;
 
     PlayerMOB* p1 = Player::Get(1);
     PlayerMOB* p2 = Player::Get(2);
@@ -22,6 +35,11 @@ bool Player::InternalSwap(int player1, int player2) {
     memcpy(temp, p1, 0x184);
     memcpy(p1, p2, 0x184);
     memcpy(p2, temp, 0x184);
+
+    tempFields = *Player::GetExtended(1);
+    *Player::GetExtended(1) = *Player::GetExtended(2);
+    *Player::GetExtended(2) = tempFields;
+
     return true;
 }
 
@@ -34,6 +52,18 @@ bool Player::InternalSwap(PlayerMOB* player1, PlayerMOB* player2) {
     memcpy(temp, player1, 0x184);
     memcpy(player1, player2, 0x184);
     memcpy(player2, temp, 0x184);
+
+    int p1Idx = Player::GetIdx(player1);
+    int p2Idx = Player::GetIdx(player2);
+
+    if (p1Idx >= 0 && p2Idx >= 0) {
+        ExtendedPlayerFields tempFields;
+
+        tempFields = *Player::GetExtended(p1Idx);
+        *Player::GetExtended(p1Idx) = *Player::GetExtended(p2Idx);
+        *Player::GetExtended(p2Idx) = tempFields;
+    }
+
     return true;
 }
 
@@ -91,7 +121,7 @@ void Player::CycleRight(PlayerMOB* pPlayer) {
     //}
 
     int playerID = static_cast<int>(pPlayer->Identity);
-    
+
     playerID++;
     if(playerID > 5)
         playerID = 1;
@@ -193,7 +223,7 @@ RECT Player::GetScreenPosition(PlayerMOB* player) {
     double* pCameraY = (double*)GM_CAMERA_Y;
     double* pCameraX = (double*)GM_CAMERA_X;
     double cam_y = -pCameraY[1];
-    double cam_x = -pCameraX[1];	
+    double cam_x = -pCameraX[1];
     double cam_d = cam_y + 600;
     double cam_r = cam_x + 800;
 
@@ -203,4 +233,36 @@ RECT Player::GetScreenPosition(PlayerMOB* player) {
     ret_rect.right = ret_rect.left + (LONG)player->momentum.width;
     ret_rect.bottom = ret_rect.top + (LONG)player->momentum.height;
     return ret_rect;
+}
+
+// TODO Should probably replace magic numbers by a macro
+static ExtendedPlayerPhysics extCPhysics[17];
+PlayerPhysics &ogPhysics = *((PlayerPhysics*) GM_JUMPHIGHT_CONSTPTR);
+
+// Characters enum doesn't account for new X2 characters
+ExtendedPlayerPhysics* Player::GetPhysicsForChar(int character) {
+    if (character < 0 || character > 16) return nullptr;
+
+    return &extCPhysics[character];
+}
+
+// 0 - 200 for players, 201 - 211 for player templates
+static ExtendedPlayerFields extPFields[212];
+
+ExtendedPlayerFields* Player::GetExtended(int index) {
+    if (index >= 1000 && index <= 1010) {
+        return &extPFields[index - 799];
+    }
+    else if (index >= 0 && index <= GM_PLAYERS_COUNT) {
+        return &extPFields[index];
+    }
+    else {
+        return nullptr;
+    }
+}
+
+void Player::ClearExtendedFields() {
+    for (int i = 0; i < 212; i++) {
+        extPFields[i].overridenFields = 0;
+    }
 }
