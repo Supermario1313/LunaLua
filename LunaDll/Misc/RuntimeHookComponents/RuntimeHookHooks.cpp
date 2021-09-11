@@ -24,6 +24,7 @@
 
 #include "../../SMBXInternal/NPCs.h"
 #include "../../SMBXInternal/Blocks.h"
+#include "../../SMBXInternal/PlayerMOB.h"
 #include "../../SMBXInternal/Level.h"
 #include "../../SMBXInternal/Sound.h"
 
@@ -2755,7 +2756,7 @@ _declspec(naked) void __stdcall runtimeHookStaticDirectionWrapper(void)
         push edx
 
         movzx eax, ax
-        push eax // eax = NPC ID 
+        push eax // eax = NPC ID
         call runtimeHookStaticDirection
 
         pop edx
@@ -2999,10 +3000,10 @@ static int __stdcall runtimeHookCompareWalkBlock(unsigned int oldBlockIdx, unsig
 	if (newBlockIdx > GM_BLOCK_COUNT) return 0;
 	Block& oldBlock = Blocks::GetBase()[oldBlockIdx];
 	Block& newBlock = Blocks::GetBase()[newBlockIdx];
-	
+
 	double newBlockY = blockGetTopYTouching(newBlock, *referenceLoc);
 	double oldBlockY = blockGetTopYTouching(oldBlock, *referenceLoc);
-	
+
 	if (newBlockY < oldBlockY)
 	{
 		// New block is higher, replace
@@ -3066,7 +3067,7 @@ _declspec(naked) void __stdcall runtimeHookCompareWalkBlockForPlayerWrapper(void
     // JMP from 009A3FD3
     __asm {
 		// eax, ecx, edx are all free for use here
-	
+
 		lea   edx,word ptr ss:[ebx+0xC0]
 		movsx ecx,word ptr ss:[ebp-0x120]
 		movsx eax,word ptr ss:[ebp-0xF8]
@@ -3074,7 +3075,7 @@ _declspec(naked) void __stdcall runtimeHookCompareWalkBlockForPlayerWrapper(void
 		push ecx
 		push eax
 		call runtimeHookCompareWalkBlock
-		
+
 		cmp eax, 0
 		jne blockIsHigher
 
@@ -3727,7 +3728,7 @@ __declspec(naked) void __stdcall runtimeHookSpeedOverride(void)
         call runtimeHookSpeedOverrideCheck
         cmp eax, 0
         jne ignorespeed
-        
+
         pop ecx
         pop eax
         popfd
@@ -3881,5 +3882,78 @@ _declspec(naked) void __stdcall runtimeHookBlockSpeedSet_FSTP_EAX_EDX_EDI(void)
         pop eax
 
         ret
+    }
+}
+
+// EXTENDED PLAYER PHYSICS HOOKS
+
+void __stdcall setupCustomPhysics(void) {
+    for (int character = 0; character <= 16; character++) {
+        ExtendedPlayerPhysics &extPhysics = *Player::GetPhysicsForChar(character);
+
+        extPhysics.physics.jumpHeight = 20;
+        extPhysics.physics.blockJumpHeight = 25;
+        extPhysics.physics.headJumpHeight = 22;
+        extPhysics.physics.npcJumpheight = 22;
+        extPhysics.physics.springJumpHeight = 55;
+        extPhysics.physics.jumpVelocity = -5.7f;
+        extPhysics.physics.runSpeed = 6.0f;
+        extPhysics.physics.walkSpeed = 3.0f;
+        extPhysics.physics.terminalVelocity = 12;
+        extPhysics.physics.gravity = 0.4f;
+        extPhysics.spinjumpHeight = 14;
+        extPhysics.shellJumpHeight = 12;
+        extPhysics.blockSpinjumpHeight = 19;
+        extPhysics.headSpinjumpHeight = 16;
+        extPhysics.npcSpinjumpHeight = 16;
+        extPhysics.springSpinjumpHeight = 49;
+
+        if (character == 2) {
+            extPhysics.physics.jumpHeight += 3;
+            extPhysics.physics.blockJumpHeight += 3;
+            extPhysics.physics.headJumpHeight += 3;
+            extPhysics.physics.npcJumpheight += 3;
+            extPhysics.physics.springJumpHeight += 3;
+            extPhysics.spinjumpHeight += 3;
+            extPhysics.blockSpinjumpHeight += 3;
+            extPhysics.headSpinjumpHeight += 3;
+            extPhysics.npcSpinjumpHeight += 3;
+            extPhysics.springSpinjumpHeight += 3;
+        }
+
+    }
+
+    native_initStaticVals();
+}
+
+void __stdcall runtimeHookJumpVars(int playerID) {
+    PlayerMOB *player = Player::Get(playerID);
+    ExtendedPlayerFields *extFields = Player::GetExtended(playerID);
+    ExtendedPlayerPhysics *globalPhysics = Player::GetPhysicsForChar(player->Identity);
+
+    if (player->IsSpinjumping) {
+        if (extFields->overridenFields << 10 & 1) { // global spinjumpHeight overriden
+            player->UpwardJumpingForce = extFields->extPhysics.spinjumpHeight;
+        } else {
+            player->UpwardJumpingForce = globalPhysics->spinjumpHeight;
+        }
+    } else {
+        if (extFields->overridenFields & 1) { // global jumpHeight overriden
+            player->UpwardJumpingForce = extFields->extPhysics.physics.jumpHeight;
+        } else {
+            player->UpwardJumpingForce = globalPhysics->physics.jumpHeight;
+        }
+    }
+}
+
+void __stdcall runtimeHookSpinjumpVars(int playerID) {
+    PlayerMOB *player = Player::Get(playerID);
+    ExtendedPlayerFields *extFields = Player::GetExtended(playerID);
+    ExtendedPlayerPhysics *globalPhysics = Player::GetPhysicsForChar(player->Identity);
+
+    if (extFields->overridenFields << 10 & 1) { // global spinjumpHeight overriden
+        player->UpwardJumpingForce = extFields->extPhysics.spinjumpHeight;
+    } else {
+        player->UpwardJumpingForce = globalPhysics->spinjumpHeight;
     }
 }

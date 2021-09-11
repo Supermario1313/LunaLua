@@ -128,6 +128,7 @@ void LunaLua_loadLevelFile(LevelData &outData, std::wstring fullPath, bool isVal
     // Clear extended fields
     NPC::ClearExtendedFields();
     Blocks::ClearExtendedFields();
+    Player::ClearExtendedFields();
 
     // We should clear the anim array apparently though
     memset(GM_ANIM_PTR, 0, 1000*sizeof(SMBXAnimation));
@@ -146,7 +147,7 @@ void LunaLua_loadLevelFile(LevelData &outData, std::wstring fullPath, bool isVal
 
         // Init Config-Txt
         VB6StrPtr customFolderVB6 = customFolder;
-        
+
         // Lua code reads npc-*.txt files now, no longer need this
         //native_loadNPCConfig(&customFolderVB6);
     }

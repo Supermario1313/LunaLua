@@ -298,7 +298,7 @@ LRESULT CALLBACK MsgHOOKProc(int nCode, WPARAM wParam, LPARAM lParam)
     default:
         break;
     }
-    
+
     return CallNextHookEx(HookWnd, nCode, wParam, lParam);
 }
 
@@ -1246,7 +1246,7 @@ void TrySkipPatch()
     PATCH(0xAA6DD7).CALL(runtimeHookBlockSpeedSet_FSTP_EAX_EDX_ESI).NOP_PAD_TO_SIZE<7>().Apply();
     PATCH(0x9D1221).CALL(runtimeHookBlockSpeedSet_FSTP_EAX_EDX_ESI).NOP_PAD_TO_SIZE<7>().Apply();
     PATCH(0xA22E69).CALL(runtimeHookBlockSpeedSet_FSTP_EAX_EDX_EDI).NOP_PAD_TO_SIZE<7>().Apply();
-    
+
 	// Apply character ID patches (used to be applied/unapplied when registering characters and clearing this, but at this point safer to always have applied)
 	runtimeHookCharacterIdApplyPatch();
 
@@ -1257,5 +1257,59 @@ void TrySkipPatch()
     *(void**)0x00401124 = (void*)&vbaR4VarHook;
     rtcMsgBox = (int(__stdcall *)(VARIANTARG*, DWORD, DWORD, DWORD, DWORD))(*(void**)0x004010A8);
     *(void**)0x004010A8 = (void*)&rtcMsgBoxHook;
-}
 
+    // EXTENDED PLAYER PHYSICS HOOKS
+
+    // init variables
+    PATCH(0x8BF2A8)
+        .CALL(setupCustomPhysics)
+        .Apply();
+
+    // jumpHeight / spinjumpHeight
+    PATCH(0x998607)
+        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerID
+        .PUSH_IMM32(0x998650)                      // return adress
+        .JMP(runtimeHookJumpVars)
+        .Apply();
+
+    PATCH(0x99B7BA)
+        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF)
+        .PUSH_IMM32(0x99B804)
+        .JMP(runtimeHookJumpVars)
+        .Apply();
+
+    PATCH(0x99CB2D)
+        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF)
+        .PUSH_IMM32(0x99CB77)
+        .JMP(runtimeHookJumpVars)
+        .Apply();
+
+    PATCH(0x99CFFE)
+        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF)
+        .PUSH_IMM32(0x99D048)
+        .JMP(runtimeHookJumpVars)
+        .Apply();
+
+    PATCH(0x99D700)
+        .bytes(0x0F, 0x1F, 0x80, 0x00, 0x00, 0x00, 0x00) //Faster than a bunch of NOPs, see Intel® 64 and IA-32 Architectures Software Developer Manual, vol. 2B, 4-169, Table 4-12
+        .bytes(0x0F, 0x1F, 0x80, 0x00, 0x00, 0x00, 0x00)
+        .Apply();
+
+    PATCH(0x99D736)
+        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF)
+        .PUSH_IMM32(0x99D777)
+        .JMP(runtimeHookJumpVars)
+        .Apply();
+
+    PATCH(0x99E32D)
+        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF)
+        .PUSH_IMM32(0x99E358)
+        .JMP(runtimeHookSpinjumpVars)
+        .Apply();
+
+    PATCH(0x99E40F)
+        .bytes(0x66, 0x0F, 0x1F, 0x84, 0x00, 0x00, 0x00, 0x00, 0x00) //Same as above
+        .bytes(0x66, 0x0F, 0x1F, 0x84, 0x00, 0x00, 0x00, 0x00, 0x00)
+        .bytes(0x66, 0x0F, 0x1F, 0x44, 0x00, 0x00)
+        .Apply();
+}

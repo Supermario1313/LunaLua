@@ -492,5 +492,9 @@ void __stdcall runtimeHookBlockSpeedSet_MOV_ECX_EDX_ESI(void);
 void __stdcall runtimeHookBlockSpeedSet_FSTP_EAX_EDX_ESI(void);
 void __stdcall runtimeHookBlockSpeedSet_FSTP_EAX_EDX_EDI(void);
 
-#endif
+// EXTENDED PLAYER PHYSICS HOOKS
+void __stdcall setupCustomPhysics(void);
+void __stdcall runtimeHookJumpVars(int returnAddress);
+void __stdcall runtimeHookSpinjumpVars(int returnAddress);
 
+#endif
