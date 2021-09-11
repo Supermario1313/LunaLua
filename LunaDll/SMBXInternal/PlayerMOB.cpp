@@ -237,7 +237,7 @@ RECT Player::GetScreenPosition(PlayerMOB* player) {
 
 // TODO Should probably replace magic numbers by a macro
 static ExtendedPlayerPhysics extCPhysics[17];
-PlayerPhysics &ogPhysics = *((PlayerPhysics*) GM_JUMPHIGHT_CONSTPTR);
+PlayerPhysics &Player::ogPhysics = *((PlayerPhysics*) GM_JUMPHIGHT_CONSTPTR);
 
 // Characters enum doesn't account for new X2 characters
 ExtendedPlayerPhysics* Player::GetPhysicsForChar(int character) {
