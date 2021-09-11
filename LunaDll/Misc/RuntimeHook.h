@@ -494,7 +494,8 @@ void __stdcall runtimeHookBlockSpeedSet_FSTP_EAX_EDX_EDI(void);
 
 // EXTENDED PLAYER PHYSICS HOOKS
 void __stdcall setupCustomPhysics(void);
-void __stdcall runtimeHookJumpVars(int returnAddress);
-void __stdcall runtimeHookSpinjumpVars(int returnAddress);
+void __stdcall runtimeHookJumpVars(int playerID);
+void __stdcall runtimeHookSpinjumpVars(int playerID);
+void __stdcall runtimeHookShellJumpVars(int playerID);
 
 #endif

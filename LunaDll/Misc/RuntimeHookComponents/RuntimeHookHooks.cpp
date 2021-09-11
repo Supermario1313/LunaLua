@@ -3957,3 +3957,15 @@ void __stdcall runtimeHookSpinjumpVars(int playerID) {
         player->UpwardJumpingForce = globalPhysics->spinjumpHeight;
     }
 }
+
+void __stdcall runtimeHookShellJumpVars(int playerID) {
+    PlayerMOB *player = Player::Get(playerID);
+    ExtendedPlayerFields *extFields = Player::GetExtended(playerID);
+    ExtendedPlayerPhysics *globalPhysics = Player::GetPhysicsForChar(player->Identity);
+
+    if (extFields->overridenFields << 11 & 1) { // global spinjumpHeight overriden
+        player->UpwardJumpingForce = extFields->extPhysics.shellJumpHeight;
+    } else {
+        player->UpwardJumpingForce = globalPhysics->shellJumpHeight;
+    }
+}
