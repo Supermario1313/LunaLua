@@ -497,5 +497,6 @@ void __stdcall setupCustomPhysics(void);
 void __stdcall runtimeHookJumpVars(int playerID);
 void __stdcall runtimeHookSpinjumpVars(int playerID);
 void __stdcall runtimeHookShellJumpVars(int playerID);
+void __stdcall runtimeHookNoteBlockJumpVars(int playerID);
 
 #endif

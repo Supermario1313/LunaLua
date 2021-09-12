@@ -1319,4 +1319,17 @@ void TrySkipPatch()
         .PUSH_IMM32(0x99D658)
         .JMP(runtimeHookShellJumpVars)
         .Apply();
+
+    // noteBlockJumpHeight / noteBlockSpinjumpHeight
+    PATCH(0x9A5C45)
+        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF)
+        .PUSH_IMM32(0x9A5C92)
+        .JMP(runtimeHookNoteBlockJumpVars)
+        .Apply();
+
+    PATCH(0x9A6848)
+        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF)
+        .PUSH_IMM32(0x9A6892)
+        .JMP(runtimeHookNoteBlockJumpVars)
+        .Apply();
 }

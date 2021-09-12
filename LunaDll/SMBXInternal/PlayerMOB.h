@@ -376,7 +376,7 @@ struct PlayerMOB {
 
 struct PlayerPhysics {
     short jumpHeight;
-    short blockJumpHeight;
+    short noteBlockJumpHeight;
     short headJumpHeight;
     short npcJumpheight;
     short springJumpHeight;
@@ -393,7 +393,7 @@ struct ExtendedPlayerPhysics {
     PlayerPhysics physics;
     short spinjumpHeight;
     short shellJumpHeight;
-    short blockSpinjumpHeight;
+    short noteBlockSpinjumpHeight;
     short headSpinjumpHeight;
     short npcSpinjumpHeight;
     short springSpinjumpHeight;
