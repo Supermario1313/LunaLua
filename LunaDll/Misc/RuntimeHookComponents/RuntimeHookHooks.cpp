@@ -3972,13 +3972,13 @@ void __stdcall runtimeHookNoteBlockJumpVars(int playerID) {
     ExtendedPlayerPhysics *globalPhysics = Player::GetPhysicsForChar(player->Identity);
 
     if (player->IsSpinjumping) {
-        if (extFields->overridenFields << 10 & 1) { // global spinjumpHeight overriden
+        if (extFields->overridenFields << 12 & 1) { // global spinjumpHeight overriden
             player->UpwardJumpingForce = extFields->extPhysics.noteBlockSpinjumpHeight;
         } else {
             player->UpwardJumpingForce = globalPhysics->noteBlockSpinjumpHeight;
         }
     } else {
-        if (extFields->overridenFields & 1) { // global jumpHeight overriden
+        if (extFields->overridenFields << 1 & 1) { // global jumpHeight overriden
             player->UpwardJumpingForce = extFields->extPhysics.physics.noteBlockJumpHeight;
         } else {
             player->UpwardJumpingForce = globalPhysics->physics.noteBlockJumpHeight;
@@ -3992,13 +3992,13 @@ void __stdcall runtimeHookNpcJumpVars(int playerID) {
     ExtendedPlayerPhysics *globalPhysics = Player::GetPhysicsForChar(player->Identity);
 
     if (player->IsSpinjumping) {
-        if (extFields->overridenFields << 10 & 1) { // global spinjumpHeight overriden
+        if (extFields->overridenFields << 14 & 1) { // global spinjumpHeight overriden
             player->UpwardJumpingForce = extFields->extPhysics.npcSpinjumpHeight;
         } else {
             player->UpwardJumpingForce = globalPhysics->npcSpinjumpHeight;
         }
     } else {
-        if (extFields->overridenFields & 1) { // global jumpHeight overriden
+        if (extFields->overridenFields << 3 & 1) { // global jumpHeight overriden
             player->UpwardJumpingForce = extFields->extPhysics.physics.npcJumpHeight;
         } else {
             player->UpwardJumpingForce = globalPhysics->physics.npcJumpHeight;
