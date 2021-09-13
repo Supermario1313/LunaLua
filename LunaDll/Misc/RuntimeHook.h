@@ -498,5 +498,6 @@ void __stdcall runtimeHookJumpVars(int playerID);
 void __stdcall runtimeHookSpinjumpVars(int playerID);
 void __stdcall runtimeHookShellJumpVars(int playerID);
 void __stdcall runtimeHookNoteBlockJumpVars(int playerID);
+void __stdcall runtimeHookNpcJumpVars(int playerID);
 
 #endif

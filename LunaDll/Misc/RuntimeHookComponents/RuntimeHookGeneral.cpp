@@ -1332,4 +1332,16 @@ void TrySkipPatch()
         .PUSH_IMM32(0x9A6892)
         .JMP(runtimeHookNoteBlockJumpVars)
         .Apply();
+
+    // npcJumpHeight / npcSpinjumpHeight
+    PATCH(0x9B08E5)
+        .PUSH_ECX()
+        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF)
+        .PUSH_IMM32(0x9B092E)
+        .JMP(runtimeHookNpcJumpVars)
+        .Apply();
+
+    PATCH(0x9B092E)
+        .POP_ECX()
+        .Apply();
 }

@@ -3894,7 +3894,7 @@ void __stdcall setupCustomPhysics(void) {
         extPhysics.physics.jumpHeight = 20;
         extPhysics.physics.noteBlockJumpHeight = 25;
         extPhysics.physics.headJumpHeight = 22;
-        extPhysics.physics.npcJumpheight = 22;
+        extPhysics.physics.npcJumpHeight = 22;
         extPhysics.physics.springJumpHeight = 55;
         extPhysics.physics.jumpVelocity = -5.7f;
         extPhysics.physics.runSpeed = 6.0f;
@@ -3912,7 +3912,7 @@ void __stdcall setupCustomPhysics(void) {
             extPhysics.physics.jumpHeight += 3;
             extPhysics.physics.noteBlockJumpHeight += 3;
             extPhysics.physics.headJumpHeight += 3;
-            extPhysics.physics.npcJumpheight += 3;
+            extPhysics.physics.npcJumpHeight += 3;
             extPhysics.physics.springJumpHeight += 3;
             extPhysics.spinjumpHeight += 3;
             extPhysics.noteBlockSpinjumpHeight += 3;
@@ -3982,6 +3982,26 @@ void __stdcall runtimeHookNoteBlockJumpVars(int playerID) {
             player->UpwardJumpingForce = extFields->extPhysics.physics.noteBlockJumpHeight;
         } else {
             player->UpwardJumpingForce = globalPhysics->physics.noteBlockJumpHeight;
+        }
+    }
+}
+
+void __stdcall runtimeHookNpcJumpVars(int playerID) {
+    PlayerMOB *player = Player::Get(playerID);
+    ExtendedPlayerFields *extFields = Player::GetExtended(playerID);
+    ExtendedPlayerPhysics *globalPhysics = Player::GetPhysicsForChar(player->Identity);
+
+    if (player->IsSpinjumping) {
+        if (extFields->overridenFields << 10 & 1) { // global spinjumpHeight overriden
+            player->UpwardJumpingForce = extFields->extPhysics.npcSpinjumpHeight;
+        } else {
+            player->UpwardJumpingForce = globalPhysics->npcSpinjumpHeight;
+        }
+    } else {
+        if (extFields->overridenFields & 1) { // global jumpHeight overriden
+            player->UpwardJumpingForce = extFields->extPhysics.physics.npcJumpHeight;
+        } else {
+            player->UpwardJumpingForce = globalPhysics->physics.npcJumpHeight;
         }
     }
 }

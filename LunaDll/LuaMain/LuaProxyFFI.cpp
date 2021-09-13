@@ -451,7 +451,7 @@ struct PlayerPhysics {\
     short jumpHeight;\
     short noteBlockJumpHeight;\
     short headJumpHeight;\
-    short npcJumpheight;\
+    short npcJumpHeight;\
     short springJumpHeight;\
     float jumpVelocity;\
     float runSpeed;\
