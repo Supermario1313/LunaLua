@@ -4005,3 +4005,23 @@ void __stdcall runtimeHookNpcJumpVars(int playerID) {
         }
     }
 }
+
+void __stdcall runtimeHookSpringJumpVars(int playerID) {
+    PlayerMOB *player = Player::Get(playerID);
+    ExtendedPlayerFields *extFields = Player::GetExtended(playerID);
+    ExtendedPlayerPhysics *globalPhysics = Player::GetPhysicsForChar(player->Identity);
+
+    if (player->IsSpinjumping) {
+        if (extFields->overridenFields << 15 & 1) { // global spinjumpHeight overriden
+            player->UpwardJumpingForce = extFields->extPhysics.springSpinjumpHeight;
+        } else {
+            player->UpwardJumpingForce = globalPhysics->springSpinjumpHeight;
+        }
+    } else {
+        if (extFields->overridenFields << 4 & 1) { // global jumpHeight overriden
+            player->UpwardJumpingForce = extFields->extPhysics.physics.springJumpHeight;
+        } else {
+            player->UpwardJumpingForce = globalPhysics->physics.springJumpHeight;
+        }
+    }
+}

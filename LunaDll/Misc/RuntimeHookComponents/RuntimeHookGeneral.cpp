@@ -1344,4 +1344,11 @@ void TrySkipPatch()
     PATCH(0x9B092E)
         .POP_ECX()
         .Apply();
+
+    // springJumpHeight / springSpinjumpHeight
+    PATCH(0x9B0856)
+        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF)
+        .PUSH_IMM32(0x9B089F)
+        .JMP(runtimeHookSpringJumpVars)
+        .Apply();
 }
