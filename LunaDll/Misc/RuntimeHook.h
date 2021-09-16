@@ -500,5 +500,7 @@ void __stdcall runtimeHookShellJumpVars(int playerID);
 void __stdcall runtimeHookNoteBlockJumpVars(int playerID);
 void __stdcall runtimeHookNpcJumpVars(int playerID);
 void __stdcall runtimeHookSpringJumpVars(int playerID);
+int __stdcall runtimeHookTerminalVelocityVars_Wrapper(void);
+int __stdcall runtimeHookTerminalVelocityVars_Wrapper_SaveEDX(void);
 
 #endif

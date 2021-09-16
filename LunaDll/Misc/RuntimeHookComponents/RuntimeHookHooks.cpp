@@ -4025,3 +4025,33 @@ void __stdcall runtimeHookSpringJumpVars(int playerID) {
         }
     }
 }
+
+static int __stdcall runtimeHookTerminalVelocityVars(int playerID) {
+    PlayerMOB *player = Player::Get(playerID);
+    ExtendedPlayerFields *extFields = Player::GetExtended(playerID);
+    ExtendedPlayerPhysics *globalPhysics = Player::GetPhysicsForChar(player->Identity);
+
+    if (extFields->overridenFields << 8 & 1) { // global terminalVelocity overriden
+        return extFields->extPhysics.physics.terminalVelocity;
+    } else {
+        return globalPhysics->physics.terminalVelocity;
+    }
+}
+
+_declspec(naked) int __stdcall runtimeHookTerminalVelocityVars_Wrapper(void) {
+    __asm {
+        push dword ptr [ebp - 0x114] ; playerID
+        call runtimeHookTerminalVelocityVars
+        ret
+    }
+}
+
+_declspec(naked) int __stdcall runtimeHookTerminalVelocityVars_Wrapper_SaveEDX(void) {
+    __asm {
+        push edx
+        push dword ptr [ebp - 0x114] ; playerID
+        call runtimeHookTerminalVelocityVars
+        pop edx
+        ret
+    }
+}

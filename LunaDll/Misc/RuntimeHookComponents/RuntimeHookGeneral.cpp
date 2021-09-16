@@ -1351,4 +1351,20 @@ void TrySkipPatch()
         .PUSH_IMM32(0x9B089F)
         .JMP(runtimeHookSpringJumpVars)
         .Apply();
+
+    // terminalVelocity
+    PATCH(0x99ECE7)
+        .CALL(runtimeHookTerminalVelocityVars_Wrapper)
+        .bytes(0x89, 0xC1) // mov ecx, eax
+        .Apply();
+
+    PATCH(0x9B1E76)
+        .CALL(runtimeHookTerminalVelocityVars_Wrapper)
+        .bytes(0x66, 0x90) // nop
+        .Apply();
+
+    PATCH(0x9B1E76)
+        .CALL(runtimeHookTerminalVelocityVars_Wrapper_SaveEDX)
+        .bytes(0x66, 0x90) // nop
+        .Apply();
 }
