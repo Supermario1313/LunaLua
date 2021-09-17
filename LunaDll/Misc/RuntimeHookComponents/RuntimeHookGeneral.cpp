@@ -1367,4 +1367,87 @@ void TrySkipPatch()
         .CALL(runtimeHookTerminalVelocityVars_Wrapper_SaveEDX)
         .bytes(0x66, 0x90) // nop
         .Apply();
+
+    // Skip per-player speedVar modifications
+    PATCH(0x997CA1)
+        .JMP(0x997CEC)
+        .Apply();
+
+    // runSpeed
+    PATCH(0x8D393D)
+        .PUSH_ECX()
+        .CALL(runtimeHookRunSpeedVars)
+        .Apply();
+
+    PATCH(0x99A3F6)
+        .CALL(runtimeHookRunSpeedVars_Wrapper_UpdatePlayer)
+        .NOP()
+        .Apply();
+
+    PATCH(0x99A429)
+        .CALL(runtimeHookRunSpeedVars_Wrapper_UpdatePlayer)
+        .NOP()
+        .Apply();
+
+    PATCH(0x99A44F)
+        .CALL(runtimeHookRunSpeedVars_Wrapper_UpdatePlayer)
+        .NOP()
+        .Apply();
+
+    PATCH(0x99A484)
+        .CALL(runtimeHookRunSpeedVars_Wrapper_UpdatePlayer)
+        .NOP()
+        .Apply();
+
+    PATCH(0x99A5A8)
+        .CALL(runtimeHookRunSpeedVars_Wrapper_UpdatePlayer_PushSpeedX)
+        .NOP()
+        .Apply();
+
+    PATCH(0x99A5CC)
+        .bytes(0xDE, 0xD9) // fcompp
+        .bytes(0x0F, 0x1F, 0x40, 0x00) // nop
+        .Apply();
+
+    PATCH(0x99A5E2)
+        .CALL(runtimeHookRunSpeedVars_Wrapper_UpdatePlayer_PushSpeedX)
+        .NOP()
+        .Apply();
+
+    PATCH(0x99A5FA)
+        .bytes(0xDE, 0xD9) // fcompp
+        .bytes(0x0F, 0x1F, 0x40, 0x00) // nop
+        .Apply();
+
+    PATCH(0x99A641)
+        .CALL(runtimeHookRunSpeedVars_Wrapper_UpdatePlayer_PushSpeedX)
+        .NOP()
+        .Apply();
+
+    PATCH(0x99A665)
+        .bytes(0xDE, 0xD9) // fcompp
+        .bytes(0x0F, 0x1F, 0x40, 0x00) // nop
+        .Apply();
+
+    PATCH(0x99A67B)
+        .CALL(runtimeHookRunSpeedVars_Wrapper_UpdatePlayer_PushSpeedX)
+        .NOP()
+        .Apply();
+
+    PATCH(0x99A693)
+        .bytes(0xDE, 0xD9) // fcompp
+        .bytes(0x0F, 0x1F, 0x40, 0x00) // nop
+        .Apply();
+
+    PATCH(0x9D1CF6)
+        .CALL(runtimeHookRunSpeedVars_Wrapper_LinkFrame)
+        .NOP()
+        .Apply();
+
+    PATCH(0x9D1D28)
+        .CALL(runtimeHookRunSpeedVars_Wrapper_LinkFrame)
+        .NOP()
+        .Apply();
+
+
 }
