@@ -1212,7 +1212,7 @@ __declspec(naked) static void  __stdcall HOOK_0x9A3CC5() {
 }
 static auto patch_block_passthrough_0x9A3CC5 = PATCH(0x9A3CC5).CALL(HOOK_0x9A3CC5).JMP(0x9A3DD2).NOP_PAD_TO_SIZE<269>();
 
-// Check if this is a hittable switch block... 
+// Check if this is a hittable switch block...
 __declspec(naked) static void  __stdcall HOOK_0x9DA747() {
     __asm {
         push eax
@@ -1663,11 +1663,11 @@ static Patchable* runtimeHookCharacterIdPatchList[] = {
     &patch_0x9953AC,
     &patch_0x99792D,
     &patch_0x99799D,
-    &patch_0x997CA1,
+    //&patch_0x997CA1,
     &patch_0x998040,
     &patch_0x998085,
     &patch_0x9980E6,
-    &patch_0x998614,
+    // &patch_0x998614,
     &patch_0x9987FF,
     &patch_0x998844,
     &patch_0x998889,
@@ -1704,8 +1704,8 @@ static Patchable* runtimeHookCharacterIdPatchList[] = {
     &patch_0x99A196,
     &patch_0x99A1BB,
     &patch_0x99A2B5,
-    &patch_0x99A607,
-    &patch_0x99A6A0,
+    //&patch_0x99A607,
+    //&patch_0x99A6A0,
     &patch_0x99A6E6,
     &patch_0x99A71B,
     &patch_0x99A750,
@@ -1713,23 +1713,23 @@ static Patchable* runtimeHookCharacterIdPatchList[] = {
     &patch_0x99A7B7,
     &patch_0x99A850,
     &patch_0x99ABA6,
-    &patch_0x99B7C8,
+    //&patch_0x99B7C8,
     &patch_0x99BB7B,
     &patch_0x99C017,
     &patch_0x99C096,
     &patch_0x99C510,
-    &patch_0x99CB3B,
+    //&patch_0x99CB3B,
     &patch_0x99CEED,
-    &patch_0x99D00C,
+    //&patch_0x99D00C,
     &patch_0x99D40A,
     &patch_0x99D4AD,
-    &patch_0x99D70E,
-    &patch_0x99D736,
+    //&patch_0x99D70E,
+    //&patch_0x99D736,
     &patch_0x99D83D,
     &patch_0x99D882,
     &patch_0x99E265,
-    &patch_0x99E33A,
-    &patch_0x99E6AC,
+    //&patch_0x99E33A,
+    //&patch_0x99E6AC,
     &patch_0x99EB43,
     &patch_0x99EC52,
     &patch_0x99ED2F,
@@ -1757,9 +1757,9 @@ static Patchable* runtimeHookCharacterIdPatchList[] = {
     &patch_0x9A5367,
     &patch_0x9A5377,
     &patch_0x9A538B,
-    &patch_0x9A5C52,
+    //&patch_0x9A5C52,
     &patch_0x9A5DA6,
-    &patch_0x9A6856,
+    //&patch_0x9A6856,
     &patch_0x9A69A9,
     &patch_0x9A72FE,
     &patch_0x9A75A5,
@@ -1779,8 +1779,8 @@ static Patchable* runtimeHookCharacterIdPatchList[] = {
     &patch_0x9AEA0D,
     &patch_0x9AEB73,
     &patch_0x9B081A,
-    &patch_0x9B0863,
-    &patch_0x9B08F3,
+    //&patch_0x9B0863,
+    //&patch_0x9B08F3,
     &patch_0x9B11DB,
     &patch_0x9B1A55,
     &patch_0x9B55CB,
@@ -2400,7 +2400,7 @@ static int __stdcall EffectUpdateHook(short* effectId)
             return 3;
         }
     }
-    
+
     return *effectId;
 }
 
