@@ -3907,6 +3907,7 @@ void __stdcall setupCustomPhysics(void) {
         extPhysics.headSpinjumpHeight = 16;
         extPhysics.npcSpinjumpHeight = 16;
         extPhysics.springSpinjumpHeight = 49;
+        extPhysics.minimalPMeterSpeed = 6.0f;
 
         if (character == 2) {
             extPhysics.physics.jumpHeight += 3;
@@ -3922,6 +3923,7 @@ void __stdcall setupCustomPhysics(void) {
         } else if (character == 3) {
             extPhysics.physics.runSpeed *= 0.93f;
             extPhysics.physics.walkSpeed *= 0.93f;
+            extPhysics.minimalPMeterSpeed *= 0.93f;
         } else if (character == 4) {
             extPhysics.physics.runSpeed *= 1.07f;
             extPhysics.physics.walkSpeed *= 1.07f;
@@ -4082,20 +4084,33 @@ _declspec(naked) float __stdcall runtimeHookRunSpeedVars_Wrapper_UpdatePlayer(vo
     }
 }
 
-_declspec(naked) float __stdcall runtimeHookRunSpeedVars_Wrapper_UpdatePlayer_PushSpeedX(void) {
-    __asm {
-        call runtimeHookRunSpeedVars_Wrapper_UpdatePlayer
-        fld qword ptr [ebx + 0x0E0]
-        ret
-    }
-}
-
 _declspec(naked) float __stdcall runtimeHookRunSpeedVars_Wrapper_LinkFrame(void) {
     __asm {
         mov eax, [ebp + 8]
         movsx edx, word ptr [eax]
         push edx
         call runtimeHookRunSpeedVars
+        ret
+    }
+}
+
+float __stdcall runtimeHookMinimalPMeterSpeedVars(int playerID) {
+    PlayerMOB *player = Player::Get(playerID);
+    ExtendedPlayerFields *extFields = Player::GetExtended(playerID);
+    ExtendedPlayerPhysics *globalPhysics = Player::GetPhysicsForChar(player->Identity);
+
+    if (extFields->overridenFields << 16 & 1) { // global minimalPMeterSpeed overriden
+        return extFields->extPhysics.minimalPMeterSpeed;
+    } else {
+        return globalPhysics->minimalPMeterSpeed;
+    }
+}
+
+_declspec(naked) float __stdcall runtimeHookMinimalPMeterSpeedVars_Wrapper(void) {
+    __asm {
+        push dword ptr [ebp - 0x114]
+        call runtimeHookMinimalPMeterSpeedVars
+        fld qword ptr [ebx + 0x0E0]
         ret
     }
 }

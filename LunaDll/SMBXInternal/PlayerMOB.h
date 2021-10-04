@@ -397,11 +397,12 @@ struct ExtendedPlayerPhysics {
     short headSpinjumpHeight;
     short npcSpinjumpHeight;
     short springSpinjumpHeight;
+    float minimalPMeterSpeed;
 };
 
 struct ExtendedPlayerFields {
     ExtendedPlayerPhysics extPhysics;
-    unsigned short overridenFields;
+    unsigned int overridenFields;
 };
 
 /* Verify struct is correctly sized, and also verify that a sampling of fields

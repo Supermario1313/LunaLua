@@ -504,7 +504,8 @@ int __stdcall runtimeHookTerminalVelocityVars_Wrapper(void);
 int __stdcall runtimeHookTerminalVelocityVars_Wrapper_SaveEDX(void);
 float __stdcall runtimeHookRunSpeedVars(int playerID);
 float __stdcall runtimeHookRunSpeedVars_Wrapper_UpdatePlayer(void);
-float __stdcall runtimeHookRunSpeedVars_Wrapper_UpdatePlayer_PushSpeedX(void);
 float __stdcall runtimeHookRunSpeedVars_Wrapper_LinkFrame(void);
+float __stdcall runtimeHookMinimalPMeterSpeedVars(int playerID);
+float __stdcall runtimeHookMinimalPMeterSpeedVars_Wrapper(void);
 
 #endif

@@ -469,6 +469,7 @@ struct ExtendedPlayerPhysics {\
     short headSpinjumpHeight;\
     short npcSpinjumpHeight;\
     short springSpinjumpHeight;\
+    float minimalPMeterSpeed;\
 };";
     }
 
@@ -480,7 +481,7 @@ struct ExtendedPlayerPhysics {\
         return "\
 struct ExtendedPlayerFields {\
     ExtendedPlayerPhysics extPhysics;\
-    unsigned short overridenFields;\
+    unsigned int overridenFields;\
 };";
     }
 

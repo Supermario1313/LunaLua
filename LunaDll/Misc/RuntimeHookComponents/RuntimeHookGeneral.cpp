@@ -1273,62 +1273,62 @@ void TrySkipPatch()
         .Apply();
 
     PATCH(0x99B7BA)
-        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF)
+        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerID
         .PUSH_IMM32(0x99B804)
         .JMP(runtimeHookJumpVars)
         .Apply();
 
     PATCH(0x99CB2D)
-        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF)
+        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerID
         .PUSH_IMM32(0x99CB77)
         .JMP(runtimeHookJumpVars)
         .Apply();
 
     PATCH(0x99CFFE)
-        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF)
+        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerID
         .PUSH_IMM32(0x99D048)
         .JMP(runtimeHookJumpVars)
         .Apply();
 
     PATCH(0x99D700)
-        .bytes(0x0F, 0x1F, 0x80, 0x00, 0x00, 0x00, 0x00) //Faster than a bunch of NOPs, see Intel® 64 and IA-32 Architectures Software Developer Manual, vol. 2B, 4-169, Table 4-12
-        .bytes(0x0F, 0x1F, 0x80, 0x00, 0x00, 0x00, 0x00)
+        .bytes(0x0F, 0x1F, 0x80, 0x00, 0x00, 0x00, 0x00) // Faster than a bunch of NOPs, see Intel® 64 and IA-32 Architectures Software Developer Manual, vol. 2B, 4-169, Table 4-12
+        .bytes(0x0F, 0x1F, 0x80, 0x00, 0x00, 0x00, 0x00) // nop
         .Apply();
 
     PATCH(0x99D736)
-        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF)
+        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerID
         .PUSH_IMM32(0x99D777)
         .JMP(runtimeHookJumpVars)
         .Apply();
 
     PATCH(0x99E32D)
-        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF)
+        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerID
         .PUSH_IMM32(0x99E358)
         .JMP(runtimeHookSpinjumpVars)
         .Apply();
 
     PATCH(0x99E40F)
-        .bytes(0x66, 0x0F, 0x1F, 0x84, 0x00, 0x00, 0x00, 0x00, 0x00) //Same as above
-        .bytes(0x66, 0x0F, 0x1F, 0x84, 0x00, 0x00, 0x00, 0x00, 0x00)
-        .bytes(0x66, 0x0F, 0x1F, 0x44, 0x00, 0x00)
+        .bytes(0x66, 0x0F, 0x1F, 0x84, 0x00, 0x00, 0x00, 0x00, 0x00) // nop
+        .bytes(0x66, 0x0F, 0x1F, 0x84, 0x00, 0x00, 0x00, 0x00, 0x00) // nop
+        .bytes(0x66, 0x0F, 0x1F, 0x44, 0x00, 0x00) // nop
         .Apply();
 
     // shellJumpHeight
     PATCH(0x99D61C)
-        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF)
+        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerID
         .PUSH_IMM32(0x99D658)
         .JMP(runtimeHookShellJumpVars)
         .Apply();
 
     // noteBlockJumpHeight / noteBlockSpinjumpHeight
     PATCH(0x9A5C45)
-        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF)
+        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerID
         .PUSH_IMM32(0x9A5C92)
         .JMP(runtimeHookNoteBlockJumpVars)
         .Apply();
 
     PATCH(0x9A6848)
-        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF)
+        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerID
         .PUSH_IMM32(0x9A6892)
         .JMP(runtimeHookNoteBlockJumpVars)
         .Apply();
@@ -1336,7 +1336,7 @@ void TrySkipPatch()
     // npcJumpHeight / npcSpinjumpHeight
     PATCH(0x9B08E5)
         .PUSH_ECX()
-        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF)
+        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerID
         .PUSH_IMM32(0x9B092E)
         .JMP(runtimeHookNpcJumpVars)
         .Apply();
@@ -1347,7 +1347,7 @@ void TrySkipPatch()
 
     // springJumpHeight / springSpinjumpHeight
     PATCH(0x9B0856)
-        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF)
+        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerID
         .PUSH_IMM32(0x9B089F)
         .JMP(runtimeHookSpringJumpVars)
         .Apply();
@@ -1399,46 +1399,6 @@ void TrySkipPatch()
         .NOP()
         .Apply();
 
-    PATCH(0x99A5A8)
-        .CALL(runtimeHookRunSpeedVars_Wrapper_UpdatePlayer_PushSpeedX)
-        .NOP()
-        .Apply();
-
-    PATCH(0x99A5CC)
-        .bytes(0xDE, 0xD9) // fcompp
-        .bytes(0x0F, 0x1F, 0x40, 0x00) // nop
-        .Apply();
-
-    PATCH(0x99A5E2)
-        .CALL(runtimeHookRunSpeedVars_Wrapper_UpdatePlayer_PushSpeedX)
-        .NOP()
-        .Apply();
-
-    PATCH(0x99A5FA)
-        .bytes(0xDE, 0xD9) // fcompp
-        .bytes(0x0F, 0x1F, 0x40, 0x00) // nop
-        .Apply();
-
-    PATCH(0x99A641)
-        .CALL(runtimeHookRunSpeedVars_Wrapper_UpdatePlayer_PushSpeedX)
-        .NOP()
-        .Apply();
-
-    PATCH(0x99A665)
-        .bytes(0xDE, 0xD9) // fcompp
-        .bytes(0x0F, 0x1F, 0x40, 0x00) // nop
-        .Apply();
-
-    PATCH(0x99A67B)
-        .CALL(runtimeHookRunSpeedVars_Wrapper_UpdatePlayer_PushSpeedX)
-        .NOP()
-        .Apply();
-
-    PATCH(0x99A693)
-        .bytes(0xDE, 0xD9) // fcompp
-        .bytes(0x0F, 0x1F, 0x40, 0x00) // nop
-        .Apply();
-
     PATCH(0x9D1CF6)
         .CALL(runtimeHookRunSpeedVars_Wrapper_LinkFrame)
         .NOP()
@@ -1449,5 +1409,30 @@ void TrySkipPatch()
         .NOP()
         .Apply();
 
+    // minimalPMeterSpeed
+    PATCH(0x99A5A8)
+        .CALL(runtimeHookMinimalPMeterSpeedVars_Wrapper)
+        .NOP()
+        .Apply();
 
+    PATCH(0x99A5CC)
+        .bytes(0xDE, 0xD9) // fcompp
+        .bytes(0x0F, 0x1F, 0x40, 0x00) // nop
+        .Apply();
+
+    PATCH(0x99A5E2)
+        .JMP(0x99A615);
+
+    PATCH(0x99A641)
+        .CALL(runtimeHookMinimalPMeterSpeedVars_Wrapper)
+        .NOP()
+        .Apply();
+
+    PATCH(0x99A665)
+        .bytes(0xDE, 0xD9) // fcompp
+        .bytes(0x0F, 0x1F, 0x40, 0x00) // nop
+        .Apply();
+
+    PATCH(0x99A67B)
+        .JMP(0x99A6AE);
 }
