@@ -1421,7 +1421,8 @@ void TrySkipPatch()
         .Apply();
 
     PATCH(0x99A5E2)
-        .JMP(0x99A615);
+        .JMP(0x99A615)
+        .Apply();
 
     PATCH(0x99A641)
         .CALL(runtimeHookMinimalPMeterSpeedVars_Wrapper)
@@ -1434,5 +1435,6 @@ void TrySkipPatch()
         .Apply();
 
     PATCH(0x99A67B)
-        .JMP(0x99A6AE);
+        .JMP(0x99A6AE)
+        .Apply();
 }
