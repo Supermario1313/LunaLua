@@ -374,7 +374,7 @@ struct PlayerMOB {
 
 };
 
-struct PlayerPhysics {
+struct LegacyPlayerPhysics {
     short jumpHeight;
     short noteBlockJumpHeight;
     short headJumpHeight;
@@ -389,8 +389,17 @@ struct PlayerPhysics {
 
 #pragma pack(pop)
 
-struct ExtendedPlayerPhysics {
-    PlayerPhysics physics;
+struct PlayerPhysics {
+    short jumpHeight;
+    short noteBlockJumpHeight;
+    short headJumpHeight;
+    short npcJumpHeight;
+    short springJumpHeight;
+    float jumpVelocity;
+    float runSpeed;
+    float walkSpeed;
+    float terminalVelocity;
+    float gravity;
     short spinjumpHeight;
     short shellJumpHeight;
     short noteBlockSpinjumpHeight;
@@ -398,10 +407,16 @@ struct ExtendedPlayerPhysics {
     short npcSpinjumpHeight;
     short springSpinjumpHeight;
     float minimalPMeterSpeed;
+    float waterGravity;
+    float waterTerminalVelocity;
+    float propellerForce;
+    float propellerTerminalVelocity;
+    float flyingTerminalVelocity;
+    float flyingShellTerminalVelocity; //Unused for link-based characters
 };
 
 struct ExtendedPlayerFields {
-    ExtendedPlayerPhysics extPhysics;
+    PlayerPhysics extPhysics;
     unsigned int overridenFields;
 };
 
@@ -467,8 +482,8 @@ namespace Player {
     RECT GetScreenPosition(PlayerMOB* player);
 
     // PHYSICS
-    extern PlayerPhysics &ogPhysics;
-    ExtendedPlayerPhysics *GetPhysicsForChar(int character);
+    extern LegacyPlayerPhysics &ogPhysics;
+    PlayerPhysics *GetPhysicsForChar(int character);
 
     // EXTENDED FIELDS
     ExtendedPlayerFields *GetExtended(int index);

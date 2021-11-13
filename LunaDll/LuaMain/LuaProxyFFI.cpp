@@ -440,14 +440,14 @@ typedef struct ExtendedBlockFields_\
 } ExtendedBlockFields;";
     }
 
-    FFI_EXPORT(ExtendedPlayerPhysics*) LunaLuaGetCharacterPhysics() {
+    FFI_EXPORT(PlayerPhysics*) LunaLuaGetCharacterPhysics() {
         return Player::GetPhysicsForChar(0);
     }
 
     FFI_EXPORT(const char*) LunaLuaGetPlayerPhysicsStructs() {
         return "\
 #pragma pack(push, 4)\
-struct PlayerPhysics {\
+struct LegacyPlayerPhysics {\
     short jumpHeight;\
     short noteBlockJumpHeight;\
     short headJumpHeight;\
@@ -461,8 +461,17 @@ struct PlayerPhysics {\
 };\
 #pragma pack(pop)\
 \
-struct ExtendedPlayerPhysics {\
-    PlayerPhysics physics;\
+struct PlayerPhysics {\
+    short jumpHeight;\
+    short noteBlockJumpHeight;\
+    short headJumpHeight;\
+    short npcJumpHeight;\
+    short springJumpHeight;\
+    float jumpVelocity;\
+    float runSpeed;\
+    float walkSpeed;\
+    float terminalVelocity;\
+    float gravity;\
     short spinjumpHeight;\
     short shellJumpHeight;\
     short noteBlockSpinjumpHeight;\
@@ -470,6 +479,12 @@ struct ExtendedPlayerPhysics {\
     short npcSpinjumpHeight;\
     short springSpinjumpHeight;\
     float minimalPMeterSpeed;\
+    float waterGravity;\
+    float waterTerminalVelocity;\
+    float propellerForce;\
+    float propellerTerminalVelocity;\
+    float flyingTerminalVelocity;\
+    float flyingShellTerminalVelocity;\
 };";
     }
 
@@ -480,7 +495,7 @@ struct ExtendedPlayerPhysics {\
     FFI_EXPORT(const char*) LunaLuaGetPlayerExtendedFieldsStruct() {
         return "\
 struct ExtendedPlayerFields {\
-    ExtendedPlayerPhysics extPhysics;\
+    PlayerPhysics extPhysics;\
     unsigned int overridenFields;\
 };";
     }

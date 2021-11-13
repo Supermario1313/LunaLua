@@ -1354,18 +1354,37 @@ void TrySkipPatch()
 
     // terminalVelocity
     PATCH(0x99ECE7)
-        .CALL(runtimeHookTerminalVelocityVars_Wrapper)
-        .bytes(0x89, 0xC1) // mov ecx, eax
-        .Apply();
-
-    PATCH(0x9B1E76)
-        .CALL(runtimeHookTerminalVelocityVars_Wrapper)
+        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerID
+        .CALL(runtimeHookTerminalVelocityVars)
+        .bytes(0xD9, 0x95, 0x10, 0xF2, 0xFF, 0xFF) // fst dword ptr [ebp - 0xDF0]
         .bytes(0x66, 0x90) // nop
         .Apply();
 
+    PATCH(0x99ED13)
+        .bytes(0xD9, 0x85, 0x10, 0xF2, 0xFF, 0xFF) // fld dword ptr [ebp - 0xDF0]
+        .Apply();
+
     PATCH(0x9B1E76)
-        .CALL(runtimeHookTerminalVelocityVars_Wrapper_SaveEDX)
+        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerID
+        .CALL(runtimeHookTerminalVelocityVars)
+        .bytes(0xD9, 0x95, 0x10, 0xF2, 0xFF, 0xFF) // fst dword ptr [ebp - 0xDF0]
         .bytes(0x66, 0x90) // nop
+        .Apply();
+
+    PATCH(0x9B1EA2)
+        .bytes(0xD9, 0x85, 0x10, 0xF2, 0xFF, 0xFF) // fld dword ptr [ebp - 0xDF0]
+        .Apply();
+
+    PATCH(0x9B2055)
+        .PUSH_EDX()
+        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerID
+        .CALL(runtimeHookTerminalVelocityVars)
+        .bytes(0xD9, 0x95, 0x10, 0xF2, 0xFF, 0xFF) // fst dword ptr [ebp - 0xDF0]
+        .POP_EDX()
+        .Apply();
+
+    PATCH(0x9B2081)
+        .bytes(0xD9, 0x85, 0x10, 0xF2, 0xFF, 0xFF) // fld dword ptr [ebp - 0xDF0]
         .Apply();
 
     // Skip per-player speedVar modifications
@@ -1436,5 +1455,20 @@ void TrySkipPatch()
 
     PATCH(0x99A67B)
         .JMP(0x99A6AE)
+        .Apply();
+
+    // gravity
+    PATCH(0x8DE1AA)
+        .PUSH_EBP()
+        .CALL(runtimeHookGravityVars)
+        .Apply();
+
+    PATCH(0x8DEA99)
+        .PUSH_EBP()
+        .CALL(runtimeHookGravityVars)
+        .Apply();
+
+    PATCH(0x996D94)
+        .CALL(runtimeHookUpdateGlobalGravity)
         .Apply();
 }
