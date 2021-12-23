@@ -3908,6 +3908,8 @@ void __stdcall setupCustomPhysics(void) {
         extPhysics.npcSpinjumpHeight = 16;
         extPhysics.springSpinjumpHeight = 49;
         extPhysics.minimalPMeterSpeed = 6.0f;
+        extPhysics.waterGravity = 0.04f;
+        extPhysics.waterTerminalVelocity = 3.0f;
 
         if (character == 2) {
             extPhysics.jumpHeight += 3;
@@ -3930,7 +3932,7 @@ void __stdcall setupCustomPhysics(void) {
         }
 
     }
-    
+
     native_initStaticVals();
 }
 
@@ -4116,6 +4118,40 @@ _declspec(naked) void __stdcall runtimeHookUpdateGlobalGravity(void) {
         mov eax, 0xB2C6F8
         fstp dword ptr [eax] // replace global gravity. For some reason, fstp dword ptr [0xB2C6F8] won't compile. MASM works in mysterious ways.
         mov eax, dword ptr [0xB25A20] // restore overwritten instruction
+        ret
+    }
+}
+
+float __stdcall runtimeHookWaterGravityVars(int playerID) {
+    PlayerMOB *player = Player::Get(playerID);
+    ExtendedPlayerFields *extFields = Player::GetExtended(playerID);
+    PlayerPhysics *globalPhysics = Player::GetPhysicsForChar(player->Identity);
+
+    if (extFields->overridenFields << 17 & 1) { // global waterGravity overriden
+        return extFields->extPhysics.waterGravity;
+    } else {
+        return globalPhysics->waterGravity;
+    }
+}
+
+float __stdcall runtimeHookWaterTerminalVelocityVars(int playerID) {
+    PlayerMOB *player = Player::Get(playerID);
+    ExtendedPlayerFields *extFields = Player::GetExtended(playerID);
+    PlayerPhysics *globalPhysics = Player::GetPhysicsForChar(player->Identity);
+
+    if (extFields->overridenFields << 18 & 1) { // global waterTerminalVelocity overriden
+        return extFields->extPhysics.waterTerminalVelocity;
+    } else {
+        return globalPhysics->waterTerminalVelocity;
+    }
+}
+
+_declspec(naked) void __stdcall runtimeHookCompareWaterTerminalVelocity() {
+    __asm {
+        push dword ptr [ebp - 0x114] // playerId
+        call runtimeHookWaterTerminalVelocityVars
+        fld qword ptr [ebp - 0xD68] // temporary speedY
+        fcomp
         ret
     }
 }

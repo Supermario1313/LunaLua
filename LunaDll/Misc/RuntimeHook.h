@@ -508,5 +508,8 @@ float __stdcall runtimeHookMinimalPMeterSpeedVars(int playerID);
 float __stdcall runtimeHookMinimalPMeterSpeedVars_Wrapper(void);
 float __stdcall runtimeHookGravityVars(int playerID);
 void __stdcall runtimeHookUpdateGlobalGravity(void);
+float __stdcall runtimeHookWaterGravityVars(int playerID);
+float __stdcall runtimeHookWaterTerminalVelocityVars(int playerID);
+void __stdcall runtimeHookCompareWaterTerminalVelocity();
 
 #endif

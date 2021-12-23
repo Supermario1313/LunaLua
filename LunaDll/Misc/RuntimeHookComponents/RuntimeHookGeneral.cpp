@@ -1471,4 +1471,43 @@ void TrySkipPatch()
     PATCH(0x996D94)
         .CALL(runtimeHookUpdateGlobalGravity)
         .Apply();
+
+    // waterGravity
+    PATCH(0x99C0AC)
+        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerId
+        .CALL(runtimeHookWaterGravityVars)
+        .NOP()
+        .Apply();
+
+    PATCH(0x99C130)
+        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerId
+        .CALL(runtimeHookWaterGravityVars)
+        .NOP()
+        .Apply();
+
+    PATCH(0x99C43B)
+        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerId
+        .CALL(runtimeHookWaterGravityVars)
+        .NOP()
+        .Apply();
+
+    PATCH(0x99C488)
+        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerId
+        .CALL(runtimeHookWaterGravityVars)
+        .NOP()
+        .Apply();
+
+    // waterTerminalVelocity
+    PATCH(0x99C0CE)
+        .CALL(runtimeHookCompareWaterTerminalVelocity)
+        .bytes(0x0F, 0x1F, 0x80, 0x00, 0x00, 0x00, 0x00) // nop
+        .Apply();
+
+
+    PATCH(0x99C0F7)
+        .bytes(0x75, 0x0E) // jnz 0x99C107
+        .bytes(0xDD, 0x93, 0xE8, 0x00, 0x00, 0x00) // fst qword ptr [ebx + 0xE8]
+        .bytes(0x0F, 0x1F, 0x84, 0x00, 0x00, 0x00, 0x00, 0x00) // nop
+        .bytes(0xDD, 0xD8) // fstp st0, effectively pops st0 from the FPU stack
+        .Apply();
 }
