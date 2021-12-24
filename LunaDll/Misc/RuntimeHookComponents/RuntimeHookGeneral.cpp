@@ -1468,8 +1468,11 @@ void TrySkipPatch()
         .CALL(runtimeHookGravityVars)
         .Apply();
 
-    PATCH(0x996D94)
-        .CALL(runtimeHookUpdateGlobalGravity)
+    PATCH(0x99EB43)
+        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerId
+        .CALL(runtimeHookGravityVars)
+        .bytes(0x66, 0x0F, 0x1F, 0x84, 0x00, 0x00, 0x00, 0x00, 0x00) // nop
+        .bytes(0x66, 0x90) // nop
         .Apply();
 
     // waterGravity

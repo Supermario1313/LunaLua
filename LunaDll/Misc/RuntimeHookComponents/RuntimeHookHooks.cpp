@@ -3922,6 +3922,7 @@ void __stdcall setupCustomPhysics(void) {
             extPhysics.headSpinjumpHeight += 3;
             extPhysics.npcSpinjumpHeight += 3;
             extPhysics.springSpinjumpHeight += 3;
+            extPhysics.gravity *= 0.9f;
         } else if (character == 3) {
             extPhysics.runSpeed *= 0.93f;
             extPhysics.walkSpeed *= 0.93f;
@@ -4146,7 +4147,7 @@ float __stdcall runtimeHookWaterTerminalVelocityVars(int playerID) {
     }
 }
 
-_declspec(naked) void __stdcall runtimeHookCompareWaterTerminalVelocity() {
+_declspec(naked) void __stdcall runtimeHookCompareWaterTerminalVelocity(void) {
     __asm {
         push dword ptr [ebp - 0x114] // playerId
         call runtimeHookWaterTerminalVelocityVars
