@@ -511,5 +511,7 @@ void __stdcall runtimeHookUpdateGlobalGravity(void);
 float __stdcall runtimeHookWaterGravityVars(int playerID);
 float __stdcall runtimeHookWaterTerminalVelocityVars(int playerID);
 void __stdcall runtimeHookCompareWaterTerminalVelocity(void);
+float __stdcall runtimeHookPropellerForceVars(int playerID);
+float __stdcall runtimeHookPropellerTerminalVelocityVars(int playerID);
 
 #endif

@@ -3910,6 +3910,8 @@ void __stdcall setupCustomPhysics(void) {
         extPhysics.minimalPMeterSpeed = 6.0f;
         extPhysics.waterGravity = 0.04f;
         extPhysics.waterTerminalVelocity = 3.0f;
+        extPhysics.propellerForce = 0.32f;
+        extPhysics.propellerTerminalVelocity = 1.2f;
 
         if (character == 2) {
             extPhysics.jumpHeight += 3;
@@ -3923,6 +3925,7 @@ void __stdcall setupCustomPhysics(void) {
             extPhysics.npcSpinjumpHeight += 3;
             extPhysics.springSpinjumpHeight += 3;
             extPhysics.gravity *= 0.9f;
+            extPhysics.propellerForce *= 0.9f;
         } else if (character == 3) {
             extPhysics.runSpeed *= 0.93f;
             extPhysics.walkSpeed *= 0.93f;
@@ -4154,5 +4157,29 @@ _declspec(naked) void __stdcall runtimeHookCompareWaterTerminalVelocity(void) {
         fld qword ptr [ebp - 0xD68] // temporary speedY
         fcomp
         ret
+    }
+}
+
+float __stdcall runtimeHookPropellerForceVars(int playerID) {
+    PlayerMOB *player = Player::Get(playerID);
+    ExtendedPlayerFields *extFields = Player::GetExtended(playerID);
+    PlayerPhysics *globalPhysics = Player::GetPhysicsForChar(player->Identity);
+
+    if (extFields->overridenFields << 19 & 1) { // global propellerForce overriden
+        return extFields->extPhysics.propellerForce;
+    } else {
+        return globalPhysics->propellerForce;
+    }
+}
+
+float __stdcall runtimeHookPropellerTerminalVelocityVars(int playerID) {
+    PlayerMOB *player = Player::Get(playerID);
+    ExtendedPlayerFields *extFields = Player::GetExtended(playerID);
+    PlayerPhysics *globalPhysics = Player::GetPhysicsForChar(player->Identity);
+
+    if (extFields->overridenFields << 20 & 1) { // global propellerTerminalVelocity overriden
+        return extFields->extPhysics.propellerTerminalVelocity;
+    } else {
+        return globalPhysics->propellerTerminalVelocity;
     }
 }
