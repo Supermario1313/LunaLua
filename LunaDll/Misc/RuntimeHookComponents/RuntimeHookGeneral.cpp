@@ -1360,6 +1360,10 @@ void TrySkipPatch()
         .bytes(0x66, 0x90) // nop
         .Apply();
 
+    PATCH(0x99ED0E)
+        .JMP(runtimeHookTerminalVelocityCondition)
+        .Apply();
+
     PATCH(0x99ED13)
         .bytes(0xD9, 0x85, 0x10, 0xF2, 0xFF, 0xFF) // fld dword ptr [ebp - 0xDF0]
         .Apply();
@@ -1543,5 +1547,38 @@ void TrySkipPatch()
         /* 0x99ECDD */ .bytes(0xEB, 0x50) // jmp 0x99ED2F
                        .Apply();
 
+    // flyingTerminalVelocity
+    PATCH(0x99F015)
+        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerId
+        .CALL(runtimeHookFlyingTerminalVelocityVars)
+        .NOP()
+        .Apply();
 
+    PATCH(0x99F03C)
+        .JZ(0x99F559)
+        .Apply();
+
+    PATCH(0x99F042)
+        .JMP(0x99F100)
+        .Apply();
+
+    PATCH(0x99F147)
+        .bytes(0x66, 0x0F, 0x1F, 0x44, 0x00, 0x00) // nop
+        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerId
+        .CALL(runtimeHookFlyingTerminalVelocityVars)
+        .NOP()
+        .Apply();
+
+    // flyingShellTerminalVelocity
+    PATCH(0x99F205)
+        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerId
+        .CALL(runtimeHookFlyingShellTerminalVelocityVars)
+        .NOP()
+        .Apply();
+
+    PATCH(0x99F249)
+        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerId
+        .CALL(runtimeHookFlyingShellTerminalVelocityVars)
+        .NOP()
+        .Apply();
 }

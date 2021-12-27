@@ -411,7 +411,7 @@ struct PlayerPhysics {
     float waterTerminalVelocity;
     float propellerForce;
     float propellerTerminalVelocity;
-    float flyingTerminalVelocity;
+    float flyingTerminalVelocity; //Unused for link-based characters
     float flyingShellTerminalVelocity; //Unused for link-based characters
 };
 
@@ -451,6 +451,9 @@ namespace Player {
     bool PressingJump(PlayerMOB* player);
     bool PressingRun(PlayerMOB* player);
     bool PressingSEL(PlayerMOB* pPlayer);
+    bool PressingAltJump(PlayerMOB* player);
+    bool PressingAltRun(PlayerMOB* player);
+    bool PressingPause(PlayerMOB* player);
 
     void ConsumeAllKeys(PlayerMOB* pPlayer);
 

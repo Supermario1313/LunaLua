@@ -106,6 +106,18 @@ bool Player::PressingSEL(PlayerMOB* pPlayer) {
     return (unsigned)pPlayer->keymap.dropItemKeyState == 0xFFFFFFFF ? true : false;
 }
 
+bool Player::PressingAltJump(PlayerMOB* pPlayer) {
+    return (unsigned)pPlayer->keymap.altJumpKeyState == 0xFFFFFFFF ? true : false;
+}
+
+bool Player::PressingAltRun(PlayerMOB* pPlayer) {
+    return (unsigned)pPlayer->keymap.altRunKeyState == 0xFFFFFFFF ? true : false;
+}
+
+bool Player::PressingPause(PlayerMOB* pPlayer)  {
+    return (unsigned)pPlayer->keymap.pauseKeyState == 0xFFFFFFFF ? true : false;
+}
+
 void Player::ConsumeAllKeys(PlayerMOB* pPlayer) {
     //pPlayer->
 }

@@ -3912,6 +3912,8 @@ void __stdcall setupCustomPhysics(void) {
         extPhysics.waterTerminalVelocity = 3.0f;
         extPhysics.propellerForce = 0.32f;
         extPhysics.propellerTerminalVelocity = 1.2f;
+        extPhysics.flyingTerminalVelocity = 2.0f;
+        extPhysics.flyingShellTerminalVelocity = 2.0f;
 
         if (character == 2) {
             extPhysics.jumpHeight += 3;
@@ -3930,9 +3932,11 @@ void __stdcall setupCustomPhysics(void) {
             extPhysics.runSpeed *= 0.93f;
             extPhysics.walkSpeed *= 0.93f;
             extPhysics.minimalPMeterSpeed *= 0.93f;
+            extPhysics.flyingTerminalVelocity = 4.0f;
         } else if (character == 4) {
             extPhysics.runSpeed *= 1.07f;
             extPhysics.walkSpeed *= 1.07f;
+            extPhysics.flyingTerminalVelocity = 3.0f;
         }
 
     }
@@ -4181,5 +4185,59 @@ float __stdcall runtimeHookPropellerTerminalVelocityVars(int playerID) {
         return extFields->extPhysics.propellerTerminalVelocity;
     } else {
         return globalPhysics->propellerTerminalVelocity;
+    }
+}
+
+float __stdcall runtimeHookFlyingTerminalVelocityVars(int playerID) {
+    PlayerMOB *player = Player::Get(playerID);
+    ExtendedPlayerFields *extFields = Player::GetExtended(playerID);
+    PlayerPhysics *globalPhysics = Player::GetPhysicsForChar(player->Identity);
+
+    if (extFields->overridenFields << 21 & 1) { // global flyingTerminalVelocity overriden
+        return extFields->extPhysics.flyingTerminalVelocity;
+    } else {
+        return globalPhysics->flyingTerminalVelocity;
+    }
+}
+
+float __stdcall runtimeHookFlyingShellTerminalVelocityVars(int playerID) {
+    PlayerMOB *player = Player::Get(playerID);
+    ExtendedPlayerFields *extFields = Player::GetExtended(playerID);
+    PlayerPhysics *globalPhysics = Player::GetPhysicsForChar(player->Identity);
+
+    if (extFields->overridenFields << 22 & 1) { // global flyingShellTerminalVelocity overriden
+        return extFields->extPhysics.flyingShellTerminalVelocity;
+    } else {
+        return globalPhysics->flyingShellTerminalVelocity;
+    }
+}
+
+// Prototype from RuntimeHookCharacterId.cpp
+short* getValidCharacterIDArray();
+
+static bool __stdcall runtimeHookFlyingTerminalVelocityCondition(int playerID) {
+    PlayerMOB *player = Player::Get(playerID);
+    short *baseCharacterIDs = getValidCharacterIDArray();
+
+    return (player->CurrentPowerup == 4 || player->CurrentPowerup == 5 || player->YoshiHasFlight == 0xFFFF || (player->MountType == 1 && player->MountColor == 3)) && (Player::PressingJump(player) || Player::PressingAltJump(player)) && player->Unknown5C != 0xFFFF && player->SlopeRelated == 0 && baseCharacterIDs[player->Identity - 1] != 5;
+}
+
+_declspec(naked) void __stdcall runtimeHookTerminalVelocityCondition(void) {
+    __asm {
+            test ah, 0x41
+            jnz dontChangeSpeed
+
+            push dword ptr [ebp - 0x114] // playerId
+            call runtimeHookFlyingTerminalVelocityCondition
+            test al, al
+            jnz dontChangeSpeed
+
+            push 0x99ED13
+            ret
+
+        dontChangeSpeed:
+            push 0x99ED2F
+            ret
+
     }
 }

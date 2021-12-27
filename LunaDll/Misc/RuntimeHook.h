@@ -513,5 +513,8 @@ float __stdcall runtimeHookWaterTerminalVelocityVars(int playerID);
 void __stdcall runtimeHookCompareWaterTerminalVelocity(void);
 float __stdcall runtimeHookPropellerForceVars(int playerID);
 float __stdcall runtimeHookPropellerTerminalVelocityVars(int playerID);
+float __stdcall runtimeHookFlyingTerminalVelocityVars(int playerID);
+float __stdcall runtimeHookFlyingShellTerminalVelocityVars(int playerID);
+void __stdcall runtimeHookTerminalVelocityCondition(void);
 
 #endif
