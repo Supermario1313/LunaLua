@@ -4103,6 +4103,7 @@ _declspec(naked) float __stdcall runtimeHookMinimalPMeterSpeedVars_Wrapper(void)
         push dword ptr [ebp - 0x114]
         call runtimeHookMinimalPMeterSpeedVars
         fld qword ptr [ebx + 0x0E0]
+        fabs
         ret
     }
 }
@@ -4126,6 +4127,14 @@ _declspec(naked) void __stdcall runtimeHookUpdateGlobalGravity(void) {
         mov eax, 0xB2C6F8
         fstp dword ptr [eax] // replace global gravity. For some reason, fstp dword ptr [0xB2C6F8] won't compile. MASM works in mysterious ways.
         mov eax, dword ptr [0xB25A20] // restore overwritten instruction
+        ret
+    }
+}
+
+_declspec(naked) float __stdcall runtimeHookWaterGravityVars_Wrapper(void) {
+    __asm {
+        push dword ptr [ebp - 0x114] // playerId
+        call runtimeHookWaterGravityVars
         ret
     }
 }

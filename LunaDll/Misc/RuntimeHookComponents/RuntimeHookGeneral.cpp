@@ -1353,31 +1353,28 @@ void TrySkipPatch()
         .Apply();
 
     // terminalVelocity
-    PATCH(0x99ECE7)
-        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerID
-        .CALL(runtimeHookTerminalVelocityVars)
-        .bytes(0xD9, 0x95, 0x10, 0xF2, 0xFF, 0xFF) // fst dword ptr [ebp - 0xDF0]
-        .bytes(0x66, 0x90) // nop
-        .Apply();
+    std::uint32_t terminalVelocityPatchAddresses[] {
+        0x99ECE7,
+        0x9B1E76,
+        0
+    };
 
     PATCH(0x99ED0E)
         .JMP(runtimeHookTerminalVelocityCondition)
         .Apply();
 
-    PATCH(0x99ED13)
-        .bytes(0xD9, 0x85, 0x10, 0xF2, 0xFF, 0xFF) // fld dword ptr [ebp - 0xDF0]
-        .Apply();
+    for (std::uint32_t *i = terminalVelocityPatchAddresses; *i != 0; i++) {
+        PATCH(*i)
+            .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerID
+            .CALL(runtimeHookTerminalVelocityVars)
+            .bytes(0xD9, 0x95, 0x10, 0xF2, 0xFF, 0xFF) // fst dword ptr [ebp - 0xDF0]
+            .bytes(0x66, 0x90) // nop
+            .Apply();
 
-    PATCH(0x9B1E76)
-        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerID
-        .CALL(runtimeHookTerminalVelocityVars)
-        .bytes(0xD9, 0x95, 0x10, 0xF2, 0xFF, 0xFF) // fst dword ptr [ebp - 0xDF0]
-        .bytes(0x66, 0x90) // nop
-        .Apply();
-
-    PATCH(0x9B1EA2)
-        .bytes(0xD9, 0x85, 0x10, 0xF2, 0xFF, 0xFF) // fld dword ptr [ebp - 0xDF0]
-        .Apply();
+        PATCH(*i + 0x2C)
+            .bytes(0xD9, 0x85, 0x10, 0xF2, 0xFF, 0xFF) // fld dword ptr [ebp - 0xDF0]
+            .Apply();
+    }
 
     PATCH(0x9B2055)
         .PUSH_EDX()
@@ -1402,40 +1399,38 @@ void TrySkipPatch()
         .CALL(runtimeHookRunSpeedVars)
         .Apply();
 
-    PATCH(0x99A3F6)
-        .CALL(runtimeHookRunSpeedVars_Wrapper_UpdatePlayer)
-        .NOP()
-        .Apply();
+    std::uint32_t runSpeedPatchAddresses1[] {
+        0x99A3F6,
+        0x99A429,
+        0x99A44F,
+        0x99A484,
+        0
+    };
 
-    PATCH(0x99A429)
-        .CALL(runtimeHookRunSpeedVars_Wrapper_UpdatePlayer)
-        .NOP()
-        .Apply();
+    for (std::uint32_t *i = runSpeedPatchAddresses1; *i != 0; i++) {
+        PATCH(*i)
+            .CALL(runtimeHookRunSpeedVars_Wrapper_UpdatePlayer)
+            .NOP()
+            .Apply();
+    }
 
-    PATCH(0x99A44F)
-        .CALL(runtimeHookRunSpeedVars_Wrapper_UpdatePlayer)
-        .NOP()
-        .Apply();
+    std::uint32_t runSpeedPatchAddresses2[] {
+        0x9D1CF6,
+        0x9D1D28,
+        0
+    };
 
-    PATCH(0x99A484)
-        .CALL(runtimeHookRunSpeedVars_Wrapper_UpdatePlayer)
-        .NOP()
-        .Apply();
-
-    PATCH(0x9D1CF6)
-        .CALL(runtimeHookRunSpeedVars_Wrapper_LinkFrame)
-        .NOP()
-        .Apply();
-
-    PATCH(0x9D1D28)
-        .CALL(runtimeHookRunSpeedVars_Wrapper_LinkFrame)
-        .NOP()
-        .Apply();
+    for (std::uint32_t *i = runSpeedPatchAddresses2; *i != 0; i++) {
+        PATCH(*i)
+            .CALL(runtimeHookRunSpeedVars_Wrapper_LinkFrame)
+            .NOP()
+            .Apply();
+    }
 
     // minimalPMeterSpeed
     PATCH(0x99A5A8)
         .CALL(runtimeHookMinimalPMeterSpeedVars_Wrapper)
-        .NOP()
+        .bytes(0x0F, 0x1F, 0x00) // nop
         .Apply();
 
     PATCH(0x99A5CC)
@@ -1449,7 +1444,7 @@ void TrySkipPatch()
 
     PATCH(0x99A641)
         .CALL(runtimeHookMinimalPMeterSpeedVars_Wrapper)
-        .NOP()
+        .bytes(0x0F, 0x1F, 0x00) // nop
         .Apply();
 
     PATCH(0x99A665)
@@ -1462,15 +1457,19 @@ void TrySkipPatch()
         .Apply();
 
     // gravity
-    PATCH(0x8DE1AA)
-        .PUSH_EBP()
-        .CALL(runtimeHookGravityVars)
-        .Apply();
 
-    PATCH(0x8DEA99)
-        .PUSH_EBP()
-        .CALL(runtimeHookGravityVars)
-        .Apply();
+    std::uint32_t gravityPatchAddresses1[] {
+        0x8DE1AA,
+        0x8DEA99,
+        0
+    };
+
+    for (std::uint32_t *i = gravityPatchAddresses1; *i != 0; i++) {
+        PATCH(*i)
+            .PUSH_EBP()
+            .CALL(runtimeHookGravityVars)
+            .Apply();
+    }
 
     PATCH(0x99EB43)
         .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerId
@@ -1479,29 +1478,65 @@ void TrySkipPatch()
         .bytes(0x66, 0x90) // nop
         .Apply();
 
-    // waterGravity
-    PATCH(0x99C0AC)
-        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerId
-        .CALL(runtimeHookWaterGravityVars)
-        .NOP()
+    std::uint32_t gravityPatchAddresses2[] {
+        0x99F653,
+        0x9A0422,
+        0x9A0531,
+        0x9A138A,
+        0x9A2112,
+        0
+    };
+
+    for (std::uint32_t *i = gravityPatchAddresses2; *i != 0; i++) {
+        PATCH(*i)
+            .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerId
+            .CALL(runtimeHookGravityVars)
+            .bytes(0xDD, 0x83, 0xE8, 0x00, 0x00, 0x00) // fld qword ptr [ebx + 0xE8]
+            .NOP()
+            .Apply();
+
+        PATCH(*i + 0x18)
+            .bytes(0xDE, 0xD9) // fcompp
+            .bytes(0x0F, 0x1F, 0x40, 0x00) // nop
+            .Apply();
+    }
+
+    PATCH(0x9A2112)
+        .bytes(0x8B, 0x45, 0x08) // mov eax, dword ptr [ebp + 0x8] ; pointer to playerID
+        .bytes(0xFF, 0x30) // push dword ptr [eax] ; playerID
+        .CALL(runtimeHookGravityVars)
+        .bytes(0xDD, 0x83, 0xE8, 0x00, 0x00, 0x00) // fld qword ptr [ebx + 0xE8]
+        .bytes(0x66, 0x90) // nop
         .Apply();
 
-    PATCH(0x99C130)
-        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerId
-        .CALL(runtimeHookWaterGravityVars)
-        .NOP()
+    PATCH(0x9A212A)
+        .bytes(0xDE, 0xD9) // fcompp
+        .bytes(0x0F, 0x1F, 0x40, 0x00) // nop
         .Apply();
+
+    // waterGravity
+    std::uint32_t waterGravityPatchAddresses[] {
+        0x99C0AC,
+        0x99C130,
+        0x99C488,
+        0
+    };
+
+    for (std::uint32_t *i = waterGravityPatchAddresses; *i != 0; i++) {
+        PATCH(*i)
+            .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerId
+            .CALL(runtimeHookWaterGravityVars)
+            .NOP()
+            .Apply();
+    }
 
     PATCH(0x99C43B)
-        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerId
-        .CALL(runtimeHookWaterGravityVars)
-        .NOP()
-        .Apply();
-
-    PATCH(0x99C488)
-        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerId
-        .CALL(runtimeHookWaterGravityVars)
-        .NOP()
+        .PUSH_ECX()
+        .PUSH_EDX()
+        .CALL(runtimeHookWaterGravityVars_Wrapper)
+        .POP_EDX()
+        .POP_ECX()
+        .bytes(0x0F, 0x1F, 0x44, 0x00, 0x00) // nop
         .Apply();
 
     // waterTerminalVelocity
@@ -1570,15 +1605,18 @@ void TrySkipPatch()
         .Apply();
 
     // flyingShellTerminalVelocity
-    PATCH(0x99F205)
-        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerId
-        .CALL(runtimeHookFlyingShellTerminalVelocityVars)
-        .NOP()
-        .Apply();
+    std::uint32_t flyingShellTerminalVelocityPatchAddresses[] {
+        0x99F205,
+        0x99F249,
+        0
+    };
 
-    PATCH(0x99F249)
-        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerId
-        .CALL(runtimeHookFlyingShellTerminalVelocityVars)
-        .NOP()
-        .Apply();
+    for (std::uint32_t *i = flyingShellTerminalVelocityPatchAddresses; *i != 0; i++) {
+        PATCH(*i)
+            .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerId
+            .CALL(runtimeHookFlyingShellTerminalVelocityVars)
+            .NOP()
+            .Apply();
+    }
+
 }
