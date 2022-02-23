@@ -1269,25 +1269,25 @@ void TrySkipPatch()
     PATCH(0x998607)
         .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerID
         .PUSH_IMM32(0x998650)                      // return adress
-        .JMP(runtimeHookJumpVars)
+        .JMP(runtimeHookUpdateJumpingForce<&PlayerPhysics::jumpHeight, &PlayerPhysics::spinjumpHeight>)
         .Apply();
 
     PATCH(0x99B7BA)
         .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerID
         .PUSH_IMM32(0x99B804)
-        .JMP(runtimeHookJumpVars)
+        .JMP(runtimeHookUpdateJumpingForce<&PlayerPhysics::jumpHeight, &PlayerPhysics::spinjumpHeight>)
         .Apply();
 
     PATCH(0x99CB2D)
         .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerID
         .PUSH_IMM32(0x99CB77)
-        .JMP(runtimeHookJumpVars)
+        .JMP(runtimeHookUpdateJumpingForce<&PlayerPhysics::jumpHeight, &PlayerPhysics::spinjumpHeight>)
         .Apply();
 
     PATCH(0x99CFFE)
         .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerID
         .PUSH_IMM32(0x99D048)
-        .JMP(runtimeHookJumpVars)
+        .JMP(runtimeHookUpdateJumpingForce<&PlayerPhysics::jumpHeight, &PlayerPhysics::spinjumpHeight>)
         .Apply();
 
     PATCH(0x99D700)
@@ -1298,13 +1298,13 @@ void TrySkipPatch()
     PATCH(0x99D736)
         .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerID
         .PUSH_IMM32(0x99D777)
-        .JMP(runtimeHookJumpVars)
+        .JMP(runtimeHookUpdateJumpingForce<&PlayerPhysics::jumpHeight, &PlayerPhysics::spinjumpHeight>)
         .Apply();
 
     PATCH(0x99E32D)
         .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerID
         .PUSH_IMM32(0x99E358)
-        .JMP(runtimeHookSpinjumpVars)
+        .JMP(runtimeHookUpdateJumpingForce<&PlayerPhysics::spinjumpHeight>)
         .Apply();
 
     PATCH(0x99E40F)
@@ -1317,20 +1317,20 @@ void TrySkipPatch()
     PATCH(0x99D61C)
         .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerID
         .PUSH_IMM32(0x99D658)
-        .JMP(runtimeHookShellJumpVars)
+        .JMP(runtimeHookUpdateJumpingForce<&PlayerPhysics::shellJumpHeight>)
         .Apply();
 
     // noteBlockJumpHeight / noteBlockSpinjumpHeight
     PATCH(0x9A5C45)
         .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerID
         .PUSH_IMM32(0x9A5C92)
-        .JMP(runtimeHookNoteBlockJumpVars)
+        .JMP(runtimeHookUpdateJumpingForce<&PlayerPhysics::noteBlockJumpHeight, &PlayerPhysics::noteBlockSpinjumpHeight>)
         .Apply();
 
     PATCH(0x9A6848)
         .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerID
         .PUSH_IMM32(0x9A6892)
-        .JMP(runtimeHookNoteBlockJumpVars)
+        .JMP(runtimeHookUpdateJumpingForce<&PlayerPhysics::noteBlockJumpHeight, &PlayerPhysics::noteBlockSpinjumpHeight>)
         .Apply();
 
     // npcJumpHeight / npcSpinjumpHeight
@@ -1338,7 +1338,7 @@ void TrySkipPatch()
         .PUSH_ECX()
         .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerID
         .PUSH_IMM32(0x9B092E)
-        .JMP(runtimeHookNpcJumpVars)
+        .JMP(runtimeHookUpdateJumpingForce<&PlayerPhysics::npcJumpHeight, &PlayerPhysics::npcSpinjumpHeight>)
         .Apply();
 
     PATCH(0x9B092E)
@@ -1349,7 +1349,7 @@ void TrySkipPatch()
     PATCH(0x9B0856)
         .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerID
         .PUSH_IMM32(0x9B089F)
-        .JMP(runtimeHookSpringJumpVars)
+        .JMP(runtimeHookUpdateJumpingForce<&PlayerPhysics::springJumpHeight, &PlayerPhysics::springSpinjumpHeight>)
         .Apply();
 
     // terminalVelocity
@@ -1366,7 +1366,7 @@ void TrySkipPatch()
     for (std::uint32_t *i = terminalVelocityPatchAddresses; *i != 0; i++) {
         PATCH(*i)
             .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerID
-            .CALL(runtimeHookTerminalVelocityVars)
+            .CALL(runtimeHookGetPhysicsField<float, &PlayerPhysics::terminalVelocity>)
             .bytes(0xD9, 0x95, 0x10, 0xF2, 0xFF, 0xFF) // fst dword ptr [ebp - 0xDF0]
             .bytes(0x66, 0x90) // nop
             .Apply();
@@ -1379,7 +1379,7 @@ void TrySkipPatch()
     PATCH(0x9B2055)
         .PUSH_EDX()
         .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerID
-        .CALL(runtimeHookTerminalVelocityVars)
+        .CALL(runtimeHookGetPhysicsField<float, &PlayerPhysics::terminalVelocity>)
         .bytes(0xD9, 0x95, 0x10, 0xF2, 0xFF, 0xFF) // fst dword ptr [ebp - 0xDF0]
         .POP_EDX()
         .Apply();
@@ -1396,7 +1396,7 @@ void TrySkipPatch()
     // runSpeed
     PATCH(0x8D393D)
         .PUSH_ECX()
-        .CALL(runtimeHookRunSpeedVars)
+        .CALL(runtimeHookGetPhysicsField<float, &PlayerPhysics::runSpeed>)
         .Apply();
 
     std::uint32_t runSpeedPatchAddresses1[] {
@@ -1467,13 +1467,13 @@ void TrySkipPatch()
     for (std::uint32_t *i = gravityPatchAddresses1; *i != 0; i++) {
         PATCH(*i)
             .PUSH_EBP()
-            .CALL(runtimeHookGravityVars)
+            .CALL(runtimeHookGetPhysicsField<float, &PlayerPhysics::gravity>)
             .Apply();
     }
 
     PATCH(0x99EB43)
         .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerId
-        .CALL(runtimeHookGravityVars)
+        .CALL(runtimeHookGetPhysicsField<float, &PlayerPhysics::gravity>)
         .bytes(0x66, 0x0F, 0x1F, 0x84, 0x00, 0x00, 0x00, 0x00, 0x00) // nop
         .bytes(0x66, 0x90) // nop
         .Apply();
@@ -1490,7 +1490,7 @@ void TrySkipPatch()
     for (std::uint32_t *i = gravityPatchAddresses2; *i != 0; i++) {
         PATCH(*i)
             .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerId
-            .CALL(runtimeHookGravityVars)
+            .CALL(runtimeHookGetPhysicsField<float, &PlayerPhysics::gravity>)
             .bytes(0xDD, 0x83, 0xE8, 0x00, 0x00, 0x00) // fld qword ptr [ebx + 0xE8]
             .NOP()
             .Apply();
@@ -1504,7 +1504,7 @@ void TrySkipPatch()
     PATCH(0x9A2112)
         .bytes(0x8B, 0x45, 0x08) // mov eax, dword ptr [ebp + 0x8] ; pointer to playerID
         .bytes(0xFF, 0x30) // push dword ptr [eax] ; playerID
-        .CALL(runtimeHookGravityVars)
+        .CALL(runtimeHookGetPhysicsField<float, &PlayerPhysics::gravity>)
         .bytes(0xDD, 0x83, 0xE8, 0x00, 0x00, 0x00) // fld qword ptr [ebx + 0xE8]
         .bytes(0x66, 0x90) // nop
         .Apply();
@@ -1525,7 +1525,7 @@ void TrySkipPatch()
     for (std::uint32_t *i = waterGravityPatchAddresses; *i != 0; i++) {
         PATCH(*i)
             .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerId
-            .CALL(runtimeHookWaterGravityVars)
+            .CALL(runtimeHookGetPhysicsField<float, &PlayerPhysics::waterGravity>)
             .NOP()
             .Apply();
     }
@@ -1556,7 +1556,7 @@ void TrySkipPatch()
     // propellerForce
     PATCH(0x99EC52)
         .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerId
-        .CALL(runtimeHookPropellerForceVars)
+        .CALL(runtimeHookGetPhysicsField<float, &PlayerPhysics::propellerForce>)
         .bytes(0x66, 0x0F, 0x1F, 0x84, 0x00, 0x00, 0x00, 0x00, 0x00) // nop
         .bytes(0x0F, 0x1F, 0x84, 0x00, 0x00, 0x00, 0x00, 0x00) // nop
         .Apply();
@@ -1564,7 +1564,7 @@ void TrySkipPatch()
     //propellerTerminalVelocity
     PATCH(0x99ECA2)
         .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerId
-        .CALL(runtimeHookPropellerTerminalVelocityVars)
+        .CALL(runtimeHookGetPhysicsField<float, &PlayerPhysics::propellerTerminalVelocity>)
         .NOP()
         .Apply();
 
@@ -1585,7 +1585,7 @@ void TrySkipPatch()
     // flyingTerminalVelocity
     PATCH(0x99F015)
         .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerId
-        .CALL(runtimeHookFlyingTerminalVelocityVars)
+        .CALL(runtimeHookGetPhysicsField<float, &PlayerPhysics::flyingTerminalVelocity>)
         .NOP()
         .Apply();
 
@@ -1600,7 +1600,7 @@ void TrySkipPatch()
     PATCH(0x99F147)
         .bytes(0x66, 0x0F, 0x1F, 0x44, 0x00, 0x00) // nop
         .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerId
-        .CALL(runtimeHookFlyingTerminalVelocityVars)
+        .CALL(runtimeHookGetPhysicsField<float, &PlayerPhysics::flyingTerminalVelocity>)
         .NOP()
         .Apply();
 
@@ -1614,7 +1614,7 @@ void TrySkipPatch()
     for (std::uint32_t *i = flyingShellTerminalVelocityPatchAddresses; *i != 0; i++) {
         PATCH(*i)
             .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerId
-            .CALL(runtimeHookFlyingShellTerminalVelocityVars)
+            .CALL(runtimeHookGetPhysicsField<float, &PlayerPhysics::flyingShellTerminalVelocity>)
             .NOP()
             .Apply();
     }

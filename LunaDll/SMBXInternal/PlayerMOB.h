@@ -415,6 +415,31 @@ struct PlayerPhysics {
     float flyingShellTerminalVelocity; //Unused for link-based characters
 };
 
+template <typename T, T PlayerPhysics::*field> constexpr std::size_t physicsMemberPos = 0;
+template <> constexpr std::size_t physicsMemberPos<short, &PlayerPhysics::jumpHeight> = 0;
+template <> constexpr std::size_t physicsMemberPos<short, &PlayerPhysics::noteBlockJumpHeight> = 1;
+template <> constexpr std::size_t physicsMemberPos<short, &PlayerPhysics::headJumpHeight> = 2;
+template <> constexpr std::size_t physicsMemberPos<short, &PlayerPhysics::npcJumpHeight> = 3;
+template <> constexpr std::size_t physicsMemberPos<short, &PlayerPhysics::springJumpHeight> = 4;
+template <> constexpr std::size_t physicsMemberPos<float, &PlayerPhysics::jumpVelocity> = 5;
+template <> constexpr std::size_t physicsMemberPos<float, &PlayerPhysics::runSpeed> = 6;
+template <> constexpr std::size_t physicsMemberPos<float, &PlayerPhysics::walkSpeed> = 7;
+template <> constexpr std::size_t physicsMemberPos<float, &PlayerPhysics::terminalVelocity> = 8;
+template <> constexpr std::size_t physicsMemberPos<float, &PlayerPhysics::gravity> = 9;
+template <> constexpr std::size_t physicsMemberPos<short, &PlayerPhysics::spinjumpHeight> = 10;
+template <> constexpr std::size_t physicsMemberPos<short, &PlayerPhysics::shellJumpHeight> = 11;
+template <> constexpr std::size_t physicsMemberPos<short, &PlayerPhysics::noteBlockSpinjumpHeight> = 12;
+template <> constexpr std::size_t physicsMemberPos<short, &PlayerPhysics::headSpinjumpHeight> = 13;
+template <> constexpr std::size_t physicsMemberPos<short, &PlayerPhysics::npcSpinjumpHeight> = 14;
+template <> constexpr std::size_t physicsMemberPos<short, &PlayerPhysics::springSpinjumpHeight> = 15;
+template <> constexpr std::size_t physicsMemberPos<float, &PlayerPhysics::minimalPMeterSpeed> = 16;
+template <> constexpr std::size_t physicsMemberPos<float, &PlayerPhysics::waterGravity> = 17;
+template <> constexpr std::size_t physicsMemberPos<float, &PlayerPhysics::waterTerminalVelocity> = 18;
+template <> constexpr std::size_t physicsMemberPos<float, &PlayerPhysics::propellerForce> = 19;
+template <> constexpr std::size_t physicsMemberPos<float, &PlayerPhysics::propellerTerminalVelocity> = 20;
+template <> constexpr std::size_t physicsMemberPos<float, &PlayerPhysics::flyingTerminalVelocity> = 21;
+template <> constexpr std::size_t physicsMemberPos<float, &PlayerPhysics::flyingShellTerminalVelocity> = 22;
+
 struct ExtendedPlayerFields {
     PlayerPhysics extPhysics;
     unsigned int overridenFields;

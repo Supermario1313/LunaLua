@@ -5,6 +5,7 @@
 #include <string>
 #include "../Defines.h"
 #include "AsmPatch.h"
+#include "../SMBXInternal/PlayerMOB.h"
 
 struct SMBX_Warp;
 
@@ -494,28 +495,36 @@ void __stdcall runtimeHookBlockSpeedSet_FSTP_EAX_EDX_EDI(void);
 
 // EXTENDED PLAYER PHYSICS HOOKS
 void __stdcall setupCustomPhysics(void);
-void __stdcall runtimeHookJumpVars(int playerID);
-void __stdcall runtimeHookSpinjumpVars(int playerID);
-void __stdcall runtimeHookShellJumpVars(int playerID);
-void __stdcall runtimeHookNoteBlockJumpVars(int playerID);
-void __stdcall runtimeHookNpcJumpVars(int playerID);
-void __stdcall runtimeHookSpringJumpVars(int playerID);
-float __stdcall runtimeHookTerminalVelocityVars(int playerID);
-float __stdcall runtimeHookRunSpeedVars(int playerID);
+
+template <typename T, T PlayerPhysics::*field>
+T __stdcall runtimeHookGetPhysicsField(int playerID) {
+    PlayerMOB *player = Player::Get(playerID);
+    ExtendedPlayerFields *extFields = Player::GetExtended(playerID);
+    PlayerPhysics *globalPhysics = Player::GetPhysicsForChar(player->Identity);
+
+    if (extFields->overridenFields << physicsMemberPos<T, field> & 1) { // global field overriden
+        return extFields->extPhysics.*field;
+    } else {
+        return globalPhysics->*field;
+    }
+}
+
+template <short PlayerPhysics::*jumpField, short PlayerPhysics::*spinjumpField = nullptr>
+void __stdcall runtimeHookUpdateJumpingForce(int playerID) {
+    PlayerMOB *player = Player::Get(playerID);
+
+    if (spinjumpField != nullptr && player->IsSpinjumping) {
+        player->UpwardJumpingForce = runtimeHookGetPhysicsField<short, spinjumpField>(playerID);
+    } else {
+        player->UpwardJumpingForce = runtimeHookGetPhysicsField<short, jumpField>(playerID);
+    }
+}
+
 float __stdcall runtimeHookRunSpeedVars_Wrapper_UpdatePlayer(void);
 float __stdcall runtimeHookRunSpeedVars_Wrapper_LinkFrame(void);
-float __stdcall runtimeHookMinimalPMeterSpeedVars(int playerID);
 float __stdcall runtimeHookMinimalPMeterSpeedVars_Wrapper(void);
-float __stdcall runtimeHookGravityVars(int playerID);
-void __stdcall runtimeHookUpdateGlobalGravity(void);
 float __stdcall runtimeHookWaterGravityVars_Wrapper(void);
-float __stdcall runtimeHookWaterGravityVars(int playerID);
-float __stdcall runtimeHookWaterTerminalVelocityVars(int playerID);
 void __stdcall runtimeHookCompareWaterTerminalVelocity(void);
-float __stdcall runtimeHookPropellerForceVars(int playerID);
-float __stdcall runtimeHookPropellerTerminalVelocityVars(int playerID);
-float __stdcall runtimeHookFlyingTerminalVelocityVars(int playerID);
-float __stdcall runtimeHookFlyingShellTerminalVelocityVars(int playerID);
 void __stdcall runtimeHookTerminalVelocityCondition(void);
 
 #endif
