@@ -502,22 +502,27 @@ T __stdcall runtimeHookGetPhysicsField(int playerID) {
     ExtendedPlayerFields *extFields = Player::GetExtended(playerID);
     PlayerPhysics *globalPhysics = Player::GetPhysicsForChar(player->Identity);
 
-    if (extFields->overridenFields << physicsMemberPos<T, field> & 1) { // global field overriden
+    if (extFields->overridenFields & (1 << physicsMemberPos<T, field>())) { // global field overriden
         return extFields->extPhysics.*field;
     } else {
         return globalPhysics->*field;
     }
 }
 
-template <short PlayerPhysics::*jumpField, short PlayerPhysics::*spinjumpField = nullptr>
-void __stdcall runtimeHookUpdateJumpingForce(int playerID) {
+template <short PlayerPhysics::*jumpField, short PlayerPhysics::*spinjumpField>
+void __stdcall runtimeHookUpdateJumpingAndSpinjumpingForce(int playerID) {
     PlayerMOB *player = Player::Get(playerID);
 
-    if (spinjumpField != nullptr && player->IsSpinjumping) {
-        player->UpwardJumpingForce = runtimeHookGetPhysicsField<short, spinjumpField>(playerID);
+    if (player->IsSpinjumping) {
+        runtimeHookUpdateJumpingForce<spinjumpField>(playerID);
     } else {
-        player->UpwardJumpingForce = runtimeHookGetPhysicsField<short, jumpField>(playerID);
+        runtimeHookUpdateJumpingForce<jumpField>(playerID);
     }
+}
+
+template <short PlayerPhysics::*jumpField>
+void __stdcall runtimeHookUpdateJumpingForce(int playerID) {
+    Player::Get(playerID)->UpwardJumpingForce = runtimeHookGetPhysicsField<short, jumpField>(playerID);;
 }
 
 float __stdcall runtimeHookRunSpeedVars_Wrapper_UpdatePlayer(void);

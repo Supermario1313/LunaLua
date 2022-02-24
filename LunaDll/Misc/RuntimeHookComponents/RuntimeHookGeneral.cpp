@@ -1269,25 +1269,25 @@ void TrySkipPatch()
     PATCH(0x998607)
         .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerID
         .PUSH_IMM32(0x998650)                      // return adress
-        .JMP(runtimeHookUpdateJumpingForce<&PlayerPhysics::jumpHeight, &PlayerPhysics::spinjumpHeight>)
+        .JMP(runtimeHookUpdateJumpingAndSpinjumpingForce<&PlayerPhysics::jumpHeight, &PlayerPhysics::spinjumpHeight>)
         .Apply();
 
     PATCH(0x99B7BA)
         .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerID
         .PUSH_IMM32(0x99B804)
-        .JMP(runtimeHookUpdateJumpingForce<&PlayerPhysics::jumpHeight, &PlayerPhysics::spinjumpHeight>)
+        .JMP(runtimeHookUpdateJumpingAndSpinjumpingForce<&PlayerPhysics::jumpHeight, &PlayerPhysics::spinjumpHeight>)
         .Apply();
 
     PATCH(0x99CB2D)
         .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerID
         .PUSH_IMM32(0x99CB77)
-        .JMP(runtimeHookUpdateJumpingForce<&PlayerPhysics::jumpHeight, &PlayerPhysics::spinjumpHeight>)
+        .JMP(runtimeHookUpdateJumpingAndSpinjumpingForce<&PlayerPhysics::jumpHeight, &PlayerPhysics::spinjumpHeight>)
         .Apply();
 
     PATCH(0x99CFFE)
         .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerID
         .PUSH_IMM32(0x99D048)
-        .JMP(runtimeHookUpdateJumpingForce<&PlayerPhysics::jumpHeight, &PlayerPhysics::spinjumpHeight>)
+        .JMP(runtimeHookUpdateJumpingAndSpinjumpingForce<&PlayerPhysics::jumpHeight, &PlayerPhysics::spinjumpHeight>)
         .Apply();
 
     PATCH(0x99D700)
@@ -1298,7 +1298,7 @@ void TrySkipPatch()
     PATCH(0x99D736)
         .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerID
         .PUSH_IMM32(0x99D777)
-        .JMP(runtimeHookUpdateJumpingForce<&PlayerPhysics::jumpHeight, &PlayerPhysics::spinjumpHeight>)
+        .JMP(runtimeHookUpdateJumpingAndSpinjumpingForce<&PlayerPhysics::jumpHeight, &PlayerPhysics::spinjumpHeight>)
         .Apply();
 
     PATCH(0x99E32D)
@@ -1324,13 +1324,13 @@ void TrySkipPatch()
     PATCH(0x9A5C45)
         .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerID
         .PUSH_IMM32(0x9A5C92)
-        .JMP(runtimeHookUpdateJumpingForce<&PlayerPhysics::noteBlockJumpHeight, &PlayerPhysics::noteBlockSpinjumpHeight>)
+        .JMP(runtimeHookUpdateJumpingAndSpinjumpingForce<&PlayerPhysics::noteBlockJumpHeight, &PlayerPhysics::noteBlockSpinjumpHeight>)
         .Apply();
 
     PATCH(0x9A6848)
         .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerID
         .PUSH_IMM32(0x9A6892)
-        .JMP(runtimeHookUpdateJumpingForce<&PlayerPhysics::noteBlockJumpHeight, &PlayerPhysics::noteBlockSpinjumpHeight>)
+        .JMP(runtimeHookUpdateJumpingAndSpinjumpingForce<&PlayerPhysics::noteBlockJumpHeight, &PlayerPhysics::noteBlockSpinjumpHeight>)
         .Apply();
 
     // npcJumpHeight / npcSpinjumpHeight
@@ -1338,7 +1338,7 @@ void TrySkipPatch()
         .PUSH_ECX()
         .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerID
         .PUSH_IMM32(0x9B092E)
-        .JMP(runtimeHookUpdateJumpingForce<&PlayerPhysics::npcJumpHeight, &PlayerPhysics::npcSpinjumpHeight>)
+        .JMP(runtimeHookUpdateJumpingAndSpinjumpingForce<&PlayerPhysics::npcJumpHeight, &PlayerPhysics::npcSpinjumpHeight>)
         .Apply();
 
     PATCH(0x9B092E)
@@ -1349,7 +1349,7 @@ void TrySkipPatch()
     PATCH(0x9B0856)
         .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerID
         .PUSH_IMM32(0x9B089F)
-        .JMP(runtimeHookUpdateJumpingForce<&PlayerPhysics::springJumpHeight, &PlayerPhysics::springSpinjumpHeight>)
+        .JMP(runtimeHookUpdateJumpingAndSpinjumpingForce<&PlayerPhysics::springJumpHeight, &PlayerPhysics::springSpinjumpHeight>)
         .Apply();
 
     // terminalVelocity
