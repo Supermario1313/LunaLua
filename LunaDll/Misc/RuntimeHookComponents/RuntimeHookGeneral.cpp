@@ -1619,4 +1619,13 @@ void TrySkipPatch()
             .Apply();
     }
 
+    // switchJumpVelocity
+    PATCH(0x9AD064)
+        .PUSH_ECX()
+        .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerId
+        .CALL(runtimeHookGetPhysicsField<float, &PlayerPhysics::switchJumpVelocity>)
+        .POP_ECX()
+        .bytes(0x0F, 0x1F, 0x80, 0x00, 0x00, 0x00, 0x00) // nop
+        .Apply();
+
 }

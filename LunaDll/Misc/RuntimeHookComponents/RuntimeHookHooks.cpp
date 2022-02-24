@@ -3914,6 +3914,7 @@ void __stdcall setupCustomPhysics(void) {
         extPhysics.propellerTerminalVelocity = 1.2f;
         extPhysics.flyingTerminalVelocity = 2.0f;
         extPhysics.flyingShellTerminalVelocity = 2.0f;
+        extPhysics.switchJumpVelocity = -0.4f;
 
         if (character == 2) {
             extPhysics.jumpHeight += 3;
@@ -3970,8 +3971,8 @@ _declspec(naked) float __stdcall runtimeHookRunSpeedVars_Wrapper_UpdatePlayer(vo
 
 _declspec(naked) float __stdcall runtimeHookRunSpeedVars_Wrapper_LinkFrame(void) {
     __asm {
-        mov eax, [ebp + 8]
-        movsx edx, word ptr [eax]
+        mov eax, [ebp + 8] // playerId pointer
+        movsx edx, word ptr [eax] // playerId
         push edx
         call getRunSpeed
         ret

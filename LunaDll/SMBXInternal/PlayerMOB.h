@@ -413,6 +413,7 @@ struct PlayerPhysics {
     float propellerTerminalVelocity;
     float flyingTerminalVelocity; //Unused for link-based characters
     float flyingShellTerminalVelocity; //Unused for link-based characters
+    float switchJumpVelocity;
 };
 
 template <typename T, T PlayerPhysics::*field> constexpr std::size_t physicsMemberPos = 0;
