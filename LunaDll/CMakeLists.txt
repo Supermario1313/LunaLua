@@ -296,7 +296,6 @@ target_link_libraries(LunaLuaLibShared
     odbccp32
     winmm
     shlwapi
-    #libluabind
     lua51
     dbghelp
     ws2_32
