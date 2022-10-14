@@ -4,8 +4,10 @@
 #include <vector>
 #include <string>
 #include "../Defines.h"
+#include "../SMBXInternal/PlayerMOB.h"
 #include "AsmPatch.h"
 #include "../SMBXInternal/PlayerMOB.h"
+#include "../GlobalFuncs.h"
 
 struct SMBX_Warp;
 
@@ -38,6 +40,7 @@ void TrySkipPatch();
 extern AsmPatch<777> gDisablePlayerDownwardClipFix;
 extern AsmPatch<8> gDisableNPCDownwardClipFix;
 extern AsmPatch<167> gDisableNPCDownwardClipFixSlope;
+extern Patchable *gFenceFixes[];
 
 
 /************************************************************************/
@@ -111,7 +114,6 @@ extern BOOL __stdcall WorldIconsHUDBitBltHook(HDC hdcDest, int nXDest, int nYDes
 extern short __stdcall WorldHUDIsOnCameraHook(unsigned int* camIndex, Momentum* momentumObj);
 
 extern void __stdcall GenerateScreenshotHook();
-extern LRESULT CALLBACK KeyHOOKProc(int nCode, WPARAM wParam, LPARAM lParam);
 
 // Hooks which are helping fixups
 extern void IsNPCCollidesWithVeggiHook_Wrapper();
@@ -172,8 +174,40 @@ void fixup_RenderPlayerJiterX();
 /************************************************************************/
 /* Render Priority Hooks                                                */
 /************************************************************************/
+
 template <int priority>
 _declspec(naked) static void __stdcall _RenderBelowPriorityHookImpl() {
+#ifdef __clang__
+    // NB: I'm using %c modifiers for PriorityMostSignificantDWord and PriorityLeastSignificantDWord because of a clang bug: https://bugs.llvm.org/show_bug.cgi?id=24232
+    __asm__ volatile (
+        ".intel_syntax\n"
+        "pushfd\n"
+        "push eax\n"
+        "push ecx\n"
+        "push edx\n"
+
+        "call %P[getRenderer]\n" // Pointer to the renderer is put in eax
+        "mov ecx, eax\n" // The pointer to this is stored in ecx in the __thiscall convention
+
+        "push %c[PriorityMostSignificantDWord]\n" // Push most significant dword of priority
+        "push %c[PriorityLeastSignificantDWord]\n" // Push least significant dword of priority
+
+        "call %P[RenderBelowPriority]\n"
+        
+        "pop edx\n"
+        "pop ecx\n"
+        "pop eax\n"
+        "popfd\n"
+        "ret\n"
+        ".att_syntax\n"
+        :
+        : [PriorityMostSignificantDWord] "i" (DoubleMostSignificantDWord(priority >= 100 ? DBL_MAX : priority)),
+          [PriorityLeastSignificantDWord] "i" (DoubleLeastSignificantDWord(priority >= 100 ? DBL_MAX : priority)),
+          [getRenderer] "i" (&Renderer::Get),
+          [RenderBelowPriority] "i" (&Renderer::RenderBelowPriority)
+
+    );
+#else
     __asm {
         pushfd
         push eax
@@ -188,6 +222,7 @@ _declspec(naked) static void __stdcall _RenderBelowPriorityHookImpl() {
         popfd
         ret
     }
+#endif
 }
 template<int priority>
 static inline constexpr void* GetRenderBelowPriorityHook(void) {
@@ -196,6 +231,43 @@ static inline constexpr void* GetRenderBelowPriorityHook(void) {
 
 template <int priority, unsigned int skipTargetAddr, bool* skipAddr>
 _declspec(naked) static void __stdcall _RenderBelowPriorityHookWithSkipImpl() {
+#ifdef __clang__
+    // NB: I'm using %c modifiers for PriorityMostSignificantDWord, PriorityLeastSignificantDWord, skipTargetAddrValue and skipTargetAddrValue because of a clang bug: https://bugs.llvm.org/show_bug.cgi?id=24232
+    __asm__ volatile (
+        ".intel_syntax\n"
+        "pushfd\n"
+        "push eax\n"
+        "push ecx\n"
+        "push edx\n"
+
+        "call %P[getRenderer]\n" // Pointer to the renderer is put in eax
+        "mov ecx, eax\n" // The pointer to this is stored in ecx in the __thiscall convention
+
+        "push %c[PriorityMostSignificantDWord]\n" // Push most significant dword of priority
+        "push %c[PriorityLeastSignificantDWord]\n" // Push least significant dword of priority
+
+        "call %P[RenderBelowPriority]\n"
+
+        "mov al, byte ptr [%c[skipAddrValue]]\n"
+        "test al, al\n"
+        "jnz 1f\n"
+        "mov dword ptr [esp + 16], %c[skipTargetAddrValue]\n"
+    "1:\n"
+        "pop edx\n"
+        "pop ecx\n"
+        "pop eax\n"
+        "popfd\n"
+        "ret\n"
+        ".att_syntax\n"
+        :
+        : [PriorityMostSignificantDWord] "i" (DoubleMostSignificantDWord(priority >= 100 ? DBL_MAX : priority)),
+          [PriorityLeastSignificantDWord] "i" (DoubleLeastSignificantDWord(priority >= 100 ? DBL_MAX : priority)),
+          [skipTargetAddrValue] "i" (skipTargetAddr),
+          [skipAddrValue] "i" (skipAddr),
+          [getRenderer] "i" (&Renderer::Get),
+          [RenderBelowPriority] "i" (&Renderer::RenderBelowPriority)
+    );
+#else
     __asm {
         pushfd
         push eax
@@ -226,6 +298,7 @@ _declspec(naked) static void __stdcall _RenderBelowPriorityHookWithSkipImpl() {
             ret
         }
     }
+#endif
 }
 template<int priority, unsigned int skipTargetAddr, bool* skipAddr>
 static inline constexpr void* GetRenderBelowPriorityHookWithSkip(void) {
@@ -475,6 +548,7 @@ void __stdcall runtimeHookNPCNoBlockCollisionA1760E(void);
 void __stdcall runtimeHookNPCNoBlockCollisionA1B33F(void);
 
 void __stdcall runtimeHookBlockNPCFilter(void);
+void __stdcall runtimeHookNPCCollisionGroup(void);
 
 void __stdcall runtimeHookLevelPauseCheck(void);
 
@@ -531,5 +605,10 @@ float __stdcall runtimeHookMinimalPMeterSpeedVars_Wrapper(void);
 float __stdcall runtimeHookWaterGravityVars_Wrapper(void);
 void __stdcall runtimeHookCompareWaterTerminalVelocity(void);
 void __stdcall runtimeHookTerminalVelocityCondition(void);
+bool __stdcall saveFileExists(void);
+
+void __stdcall runtimeHookSetPlayerFenceSpeed(PlayerMOB *player);
+bool __stdcall runtimeHookIncreaseFenceFrameCondition(PlayerMOB *player);
+void __stdcall runtimeHookUpdateBGOMomentum(int bgoId, int layerId);
 
 #endif

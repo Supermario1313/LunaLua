@@ -24,7 +24,7 @@ using namespace std;
 static Renderer sLunaRender;
 static Renderer sAltLunaRender;
 static DWORD altLunaRenderThread = 0;
-static std::atomic<bool> altLunaRenderThreadValid = false;
+static std::atomic<bool> altLunaRenderThreadValid(false);
 
 Renderer& Renderer::Get()
 {
@@ -295,17 +295,6 @@ void Renderer::StartCameraRender(int idx)
 {
     m_queueState.m_curCamIdx = idx;
     m_queueState.m_renderOpsProcessedCount = 0;
-}
-
-void Renderer::StoreCameraPosition(int idx)
-{
-    if (g_GLEngine.IsEnabled())
-    {
-        std::shared_ptr<GLEngineCmd_SetCamera> cmd = std::make_shared<GLEngineCmd_SetCamera>();
-        cmd->mX = SMBX_CameraInfo::getCameraX(idx);
-        cmd->mY = SMBX_CameraInfo::getCameraY(idx);
-        g_GLEngine.QueueCmd(cmd);
-    }
 }
 
 void Renderer::EndFrameRender()

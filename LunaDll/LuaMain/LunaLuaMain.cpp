@@ -25,6 +25,7 @@
 #include "../Rendering/LunaImage.h"
 #include "../Rendering/ImageLoader.h"
 #include "../Misc/RuntimeHook.h"
+#include "../Input/MouseHandler.h"
 
 #include "../Misc/LoadScreen.h"
 
@@ -123,6 +124,9 @@ bool CLunaLua::shutdown()
     gDisablePlayerDownwardClipFix.Apply();
     gDisableNPCDownwardClipFix.Apply();
     gDisableNPCDownwardClipFixSlope.Apply();
+    for (int i = 0; gFenceFixes[i] != nullptr; i++) {
+        gFenceFixes[i]->Apply();
+    }
 
     // Request cached images/sounds/files be held onto for now
     LunaImage::holdCachedImages(m_type == LUNALUA_WORLD);
@@ -527,6 +531,15 @@ void CLunaLua::setupDefaults()
         LUAHELPER_DEF_CONST(_G, RTYPE_TEXT);
     }
 
+    _G["MOUSE_BUTTON_L"] = MouseHandler::BUTTON_L;
+    _G["MOUSE_BUTTON_R"] = MouseHandler::BUTTON_R;
+    _G["MOUSE_BUTTON_M"] = MouseHandler::BUTTON_M;
+    _G["MOUSE_EVT_UP"]   = MouseHandler::EVT_UP;
+    _G["MOUSE_EVT_DOWN"] = MouseHandler::EVT_DOWN;
+    _G["MOUSE_EVT_DBL"]  = MouseHandler::EVT_DBL;
+    _G["MOUSE_WHEEL_V"]  = MouseHandler::WHEEL_V;
+    _G["MOUSE_WHEEL_H"]  = MouseHandler::WHEEL_H;
+
     _G["ODIR_UP"] = 1;
     _G["ODIR_LEFT"] = 2;
     _G["ODIR_DOWN"] = 3;
@@ -609,7 +622,7 @@ void CLunaLua::bindAll()
                     .def("captureAt", &CaptureBuffer::CaptureAt),
                 def("loadImage", (bool(*)(const std::string&, int, int))&LuaProxy::Graphics::loadImage),
                 def("loadImage", (std::shared_ptr<LunaImage>(*)(const std::string&, lua_State*))&LuaProxy::Graphics::loadImage),
-                def("loadAnimatedImage", &LuaProxy::Graphics::loadAnimatedImage, pure_out_value(_2)),
+                def("loadAnimatedImage", &LuaProxy::Graphics::loadAnimatedImage, pure_out_value<2>()),
                 def("placeSprite", (void(*)(int, int, int, int, const std::string&, int))&LuaProxy::Graphics::placeSprite),
                 def("placeSprite", (void(*)(int, int, int, int, const std::string&))&LuaProxy::Graphics::placeSprite),
                 def("placeSprite", (void(*)(int, int, int, int))&LuaProxy::Graphics::placeSprite),
@@ -618,7 +631,7 @@ void CLunaLua::bindAll()
                 def("placeSprite", (void(*)(int, const std::shared_ptr<LunaImage>&  img, int, int))&LuaProxy::Graphics::placeSprite),
                 def("unplaceSprites", (void(*)(const std::shared_ptr<LunaImage>&  img))&LuaProxy::Graphics::unplaceSprites),
                 def("unplaceSprites", (void(*)(const std::shared_ptr<LunaImage>&  img, int, int))&LuaProxy::Graphics::unplaceSprites),
-                def("getPixelData", &LuaProxy::Graphics::getPixelData, pure_out_value(_2) + pure_out_value(_3)),
+                def("getPixelData", &LuaProxy::Graphics::getPixelData, meta::join<pure_out_value<2>, pure_out_value<3>>::type()),
                 def("drawImage", (void(*)(const std::shared_ptr<LunaImage>& , double, double, lua_State*))&LuaProxy::Graphics::drawImage),
                 def("drawImage", (void(*)(const std::shared_ptr<LunaImage>& , double, double, float, lua_State*))&LuaProxy::Graphics::drawImage),
                 def("drawImage", (void(*)(const std::shared_ptr<LunaImage>& , double, double, double, double, double, double, lua_State*))&LuaProxy::Graphics::drawImage),

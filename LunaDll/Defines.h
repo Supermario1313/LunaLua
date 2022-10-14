@@ -182,8 +182,9 @@ enum CollidersType : short {
 #define GM_PLAYER_KEY_STR   9
 
 #define DEFMEM(name, type, addr) static auto& name = *(type*)(addr); \
-    static constexpr auto name ## _CONSTPTR = (type*)(addr)
-#define DEFMEM_PTR(name, type, addr) static constexpr auto name = (const type*)(addr)
+    static constexpr std::uintptr_t name ## _ADDR = addr; \
+    static auto name ## _POINTER = (type*)(addr);
+#define DEFMEM_PTR(name, type, addr) static auto name = (const type*)(addr)
 
 // General
 DEFMEM(GM_SCRN_HDC,         HDC,   0x00B25028);
@@ -603,6 +604,11 @@ DEFMEM(GM_MAX_FPS_MODE,    short,  0x00B2C8BE);
 
 // VB6 GUI
 DEFMEM(GM_FORM_GFX,        IDispatch*,      0x00B2D7C4);
+
+// VB6 Window Names
+DEFMEM(GM_GAMETITLE_1, VB6StrPtr, 0x8BD869);
+DEFMEM(GM_GAMETITLE_2, VB6StrPtr, 0x8BE25A);
+DEFMEM(GM_GAMETITLE_3, VB6StrPtr, 0x96AF26);
 
 
 /////////////////////

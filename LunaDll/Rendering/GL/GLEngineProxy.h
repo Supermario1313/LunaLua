@@ -1,7 +1,7 @@
 #ifndef GLEngineProxy__hhhh
 #define GLEngineProxy__hhhh
 
-#include <gl/glew.h>
+#include <GL/glew.h>
 #include <thread>
 #include <atomic>
 #include <memory>
@@ -56,10 +56,8 @@ public:
     // Convenience command functions
     void ClearTextures();
     void EmulatedBitBlt(int nXDest, int nYDest, int nWidth, int nHeight, HDC hdcSrc, int nXSrc, int nYSrc, DWORD dwRop);
-    void RenderCameraToScreen(HDC hdcDest, int nXOriginDest, int nYOriginDest, int nWidthDest, int nHeightDest,
-        HDC hdcSrc, int nXOriginSrc, int nYOriginSrc, int nWidthSrc, int nHeightSrc,
-        DWORD dwRop);
-    void EndFrame(HDC hdcDest, bool isLoadScreen=false);
+    void RenderCameraToScreen(int camIdx, double renderX, double renderY, double height, double width);
+    void EndFrame(HDC hdcDest, bool isLoadScreen=false, bool redrawOnly=false, bool resizeOverlay=false);
     void InitForHDC(HDC hdcDest);
 
     inline bool IsEnabled() { return mInternalGLEngine.IsEnabled(); };
