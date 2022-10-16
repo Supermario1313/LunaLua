@@ -2097,6 +2097,7 @@ void TrySkipPatch()
         0
     };
 
+    // Skips default terminal velocity code if the player is flying
     PATCH(0x99ED0E)
         .JMP(runtimeHookTerminalVelocityCondition)
         .Apply();
@@ -2239,15 +2240,19 @@ void TrySkipPatch()
             .Apply();
     }
 
-    PATCH(0x9A2112)
+    PATCH(0x9C940F)
         .bytes(0x8B, 0x45, 0x08) // mov eax, dword ptr [ebp + 0x8] ; pointer to playerID
         .bytes(0xFF, 0x30) // push dword ptr [eax] ; playerID
+        .NOP()
+        .Apply();
+    
+    PATCH(0x9C941E)
         .CALL((uintptr_t) runtimeHookGetPhysicsField<float, &PlayerPhysics::gravity>)
         .bytes(0xDD, 0x83, 0xE8, 0x00, 0x00, 0x00) // fld qword ptr [ebx + 0xE8]
-        .bytes(0x66, 0x90) // nop
+        .NOP()
         .Apply();
 
-    PATCH(0x9A212A)
+    PATCH(0x9C9430)
         .bytes(0xDE, 0xD9) // fcompp
         .bytes(0x0F, 0x1F, 0x40, 0x00) // nop
         .Apply();
@@ -2311,13 +2316,13 @@ void TrySkipPatch()
         .Apply();
 
     PATCH(0x99ECC9)
-        /* 0x99ECC9 */ .bytes(0x74, 0x10) // jz 0x99ECDB
+        /* 0x99ECC9 */ .bytes(0x74, 0x10)                         // jz 0x99ECDB
         /* 0x99ECCB */ .bytes(0xDD, 0x93, 0xE8, 0x00, 0x00, 0x00) // fst qword ptr [ebx + 0xE8]
-        /* 0x99ECD1 */ .bytes(0xDF, 0xE0) // fnstsw ax
-        /* 0x99ECD3 */ .bytes(0xA8, 0x0D) // test al, 0x0D
-        /* 0x99ECD5 */ .JNZ(0x9B51CE) // jnz j___vbaFPException
-        /* 0x99ECDB */ .bytes(0xDD, 0xD8) // fstp st0 ; effectively pops st0 from the FPU stack
-        /* 0x99ECDD */ .bytes(0xEB, 0x50) // jmp 0x99ED2F
+        /* 0x99ECD1 */ .bytes(0xDF, 0xE0)                         // fnstsw ax
+        /* 0x99ECD3 */ .bytes(0xA8, 0x0D)                         // test al, 0x0D
+        /* 0x99ECD5 */ .JNZ(0x9B51CE)                                // jnz j___vbaFPException
+        /* 0x99ECDB */ .bytes(0xDD, 0xD8)                         // fstp st0                   ; effectively pops st0 from the FPU stack
+        /* 0x99ECDD */ .bytes(0xEB, 0x50)                         // jmp 0x99ED2F               ; we jump to that location instead of 0x99ECE7 so we can skip the default terminal velocity check (modPlayer.bas @ l. 1648) if we already checked for the propeller terminal velocity.
                        .Apply();
 
     // flyingTerminalVelocity
@@ -2327,13 +2332,31 @@ void TrySkipPatch()
         .NOP()
         .Apply();
 
+    // Code from 0x99F097 to 0x99F0FF is made unused by this patch.
     PATCH(0x99F03C)
-        .JZ(0x99F559)
-        .Apply();
-
-    PATCH(0x99F042)
-        .JMP(0x99F100)
-        .Apply();
+        /* 0x99F03C */ .JNZ(0x99F100)                                                                                   // jnz 0x99F100                        ; If speedY > flyingTerminalVelocity, check other conditions at modPlayer.bas @ l. 1706
+        /* 0x99F042 */ .bytes(0x66, 0x83, 0x7B, 0x44, 0x00)                                                          // cmp word ptr [ebx + 0x44], 0        ; If shellSurf == false, we don't need to check for flyingShellTerminalVelocity
+        /* 0x99F047 */ .JZ(0x99F559)                                                                                    // jz 0x99F559                         ; In that case, go to modPlayer.bas @ l. 1730
+        /* 0x99F04D */ .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF)                                                    // push dword ptr [ebp - 0x114]        ; playerId
+        /* 0x99F053 */ .CALL((uint32_t) runtimeHookGetPhysicsField<float, &PlayerPhysics::flyingShellTerminalVelocity>) // call getFlyingShellTerminalVelocity ; get flyingShellTerminalVelocity
+        /* 0x99F058 */ .bytes(0x8B, 0x83, 0x76, 0x01, 0x00, 0x00)                                                    // mov eax, dword ptr [ebx + 0x176]    ; Get standing NPC
+        /* 0x99F05E */ .bytes(0x05, 0x80, 0x00, 0x00, 0x00)                                                          // add eax, 128                        ; Add 128 to get a positive array index (start index of the npc array is -128)
+        /* 0x99F063 */ .bytes(0x3D, 0x09, 0x14, 0x00, 0x00)                                                          // cmp eax, 5129                       ; Compare array index to npc array size
+        /* 0x99F068 */ .bytes(0x72, 0x06)                                                                            // jb 0x99F070                         ; Skip the bounds exception if the array index (considered as an unsigned number) is smaller than the array size, ie. if the array index is nonnegative and smaller than the array size.
+        /* 0x99F06A */ .bytes(0xFF, 0x15, 0xF4, 0x10, 0x40, 0x00)                                                    // call __vbaGenerateBoundsError       ; Else, raise a bounds exception
+        /* 0x99F070 */ .bytes(0x69, 0xC0, 0x58, 0x01, 0x00, 0x00)                                                    // imul eax, eax, 344                  ; Multiply the array index by the size of the npc struct to get an actual offset. This is the most optimized way to do so according to GCC and Clang with -O3.
+        /* 0x99F076 */ .bytes(0x03, 0x05, 0xE8, 0x59, 0xB2, 0x00)                                                    // add eax, dword ptr [0xB259E8]       ; Add NPC array offset to get an offset to standingNPC
+        /* 0x99F07C */ .bytes(0xDD, 0x80, 0xA0, 0x00, 0x00, 0x00)                                                    // fld qword ptr [eax + 0xA0]          ; Get standing NPC speedY
+        /* 0x99F082 */ .bytes(0xFF, 0x15, 0xBC, 0x10, 0x40, 0x00)                                                    // call __vbaFpR4                      ; Convert dfloat to float
+        /* 0x99F088 */ .bytes(0xDF, 0xF1)                                                                            // fcomip st0, st1                     ; Compare shell speed to flyingShellTerminalVelocity then pop shell speed from the fpu register stack
+        /* 0x99F08A */ .bytes(0xDD, 0xD8)                                                                            // fsp st0                             ; Pop flyingShellTerminalVelocity fpu register stack
+        /* 0x99F08C */ .JA(0x99F100)                                                                                    // ja 0x99F100                         ; If shell speedY > flyingShellTerminalVelocity, check other conditions at modPlayer.bas @ l. 1706
+        /* 0x99F092 */ .JMP(0x99F559)                                                                                   // jmp 0x99F559                        ; Else, go to modPlayer.bas @ l. 1730
+                       .Apply();
+        
+    /* The two previous patches replace modPlayer.bas @ l. 1706 by :
+     * If (.Controls.Jump = True Or .Controls.AltJump = True) And (.Location.SpeedY > GetFlyingTerminalVelocity(A) Or (.ShellSurf And NPC(.StandingOnNPC).Location.SpeedY > GetFlyingShellTerminalVelocity(A))) And .GroundPound = False And .Slope = 0 And .Character <> 5 Then
+     */
 
     PATCH(0x99F147)
         .bytes(0x66, 0x0F, 0x1F, 0x44, 0x00, 0x00) // nop

@@ -9,11 +9,11 @@ PlayerMOB* Player::Get(int index) {
 }
 
 int Player::GetIdx(PlayerMOB *player) {
-    int idx = ((PlayerMOB*)GM_PLAYERS_PTR - player) / sizeof(PlayerMOB);
+    int idx = (PlayerMOB*)GM_PLAYERS_PTR - player;
 
     if (0 <= idx && idx <= 200) return idx;
 
-    idx = ((PlayerMOB*)GM_PLAYERS_TEMPLATE - player) / sizeof(PlayerMOB);
+    idx = (PlayerMOB*)GM_PLAYERS_TEMPLATE - player;
 
     if (0 <= idx && idx <= 10) return idx + 1000;
 
@@ -26,8 +26,8 @@ bool Player::InternalSwap(int player1, int player2) {
     char temp[500];
     ExtendedPlayerFields tempFields;
 
-    PlayerMOB* p1 = Player::Get(1);
-    PlayerMOB* p2 = Player::Get(2);
+    PlayerMOB* p1 = Player::Get(player1);
+    PlayerMOB* p2 = Player::Get(player2);
 
     if(p1 == 0 || p2 == 0)
         return false;
@@ -36,9 +36,9 @@ bool Player::InternalSwap(int player1, int player2) {
     memcpy(p1, p2, 0x184);
     memcpy(p2, temp, 0x184);
 
-    tempFields = *Player::GetExtended(1);
-    *Player::GetExtended(1) = *Player::GetExtended(2);
-    *Player::GetExtended(2) = tempFields;
+    tempFields = *Player::GetExtended(player1);
+    *Player::GetExtended(player1) = *Player::GetExtended(player2);
+    *Player::GetExtended(player2) = tempFields;
 
     return true;
 }
@@ -248,6 +248,7 @@ RECT Player::GetScreenPosition(PlayerMOB* player) {
 }
 
 // TODO Should probably replace magic numbers by a macro
+// TODO Should probably move the per-character PlayerPhysics to CharacterDataStruct
 static PlayerPhysics extCPhysics[17];
 LegacyPlayerPhysics &Player::ogPhysics = *((LegacyPlayerPhysics*) GM_JUMPHIGHT_ADDR);
 

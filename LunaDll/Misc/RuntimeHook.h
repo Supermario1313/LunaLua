@@ -583,6 +583,11 @@ T __stdcall runtimeHookGetPhysicsField(int playerID) {
     }
 }
 
+template <short PlayerPhysics::*jumpField>
+void __stdcall runtimeHookUpdateJumpingForce(int playerID) {
+    Player::Get(playerID)->UpwardJumpingForce = runtimeHookGetPhysicsField<short, jumpField>(playerID);;
+}
+
 template <short PlayerPhysics::*jumpField, short PlayerPhysics::*spinjumpField>
 void __stdcall runtimeHookUpdateJumpingAndSpinjumpingForce(int playerID) {
     PlayerMOB *player = Player::Get(playerID);
@@ -594,17 +599,13 @@ void __stdcall runtimeHookUpdateJumpingAndSpinjumpingForce(int playerID) {
     }
 }
 
-template <short PlayerPhysics::*jumpField>
-void __stdcall runtimeHookUpdateJumpingForce(int playerID) {
-    Player::Get(playerID)->UpwardJumpingForce = runtimeHookGetPhysicsField<short, jumpField>(playerID);;
-}
-
 float __stdcall runtimeHookRunSpeedVars_Wrapper_UpdatePlayer(void);
 float __stdcall runtimeHookRunSpeedVars_Wrapper_LinkFrame(void);
 float __stdcall runtimeHookMinimalPMeterSpeedVars_Wrapper(void);
 float __stdcall runtimeHookWaterGravityVars_Wrapper(void);
 void __stdcall runtimeHookCompareWaterTerminalVelocity(void);
 void __stdcall runtimeHookTerminalVelocityCondition(void);
+
 bool __stdcall saveFileExists(void);
 
 void __stdcall runtimeHookSetPlayerFenceSpeed(PlayerMOB *player);
