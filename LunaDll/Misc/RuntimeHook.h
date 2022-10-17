@@ -351,6 +351,9 @@ void __stdcall runtimeHookCleanupWorld(void);
 void __stdcall runtimeHookPiranahDivByZero();
 
 void __stdcall runtimeHookHitBlock(unsigned short* blockIndex, short* fromUpSide, unsigned short* playerIdx);
+void __stdcall runtimeHookRemoveBlock(unsigned short* blockIndex, short* makeEffects);
+
+void __stdcall runtimeHookCollectNPC(short* playerIdx, short* npcIdx);
 
 void __stdcall runtimeHookLogCollideNpc(DWORD addr, short* pNpcIdx, CollidersType* pObjType, short* pObjIdx);
 void __stdcall runtimeHookCollideNpc(short* pNpcIdx, CollidersType* pObjType, short* pObjIdx);
@@ -546,6 +549,8 @@ void __stdcall runtimeHookNPCNoBlockCollisionA10EAA(void);
 void __stdcall runtimeHookNPCNoBlockCollisionA113B0(void);
 void __stdcall runtimeHookNPCNoBlockCollisionA1760E(void);
 void __stdcall runtimeHookNPCNoBlockCollisionA1B33F(void);
+
+void __stdcall runtimeHookBlockPlayerFilter(void);
 
 void __stdcall runtimeHookBlockNPCFilter(void);
 void __stdcall runtimeHookNPCCollisionGroup(void);

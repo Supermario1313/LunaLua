@@ -2203,6 +2203,35 @@ void __stdcall runtimeHookHitBlock(unsigned short* blockIndex, short* fromUpSide
     }
 }
 
+static _declspec(naked) void __stdcall removeBlock_OrigFunc(unsigned short* blockIndex, short* makeEffects)
+{
+    __asm {
+        PUSH EBP
+        MOV EBP, ESP
+        SUB ESP, 0x8
+        PUSH 0x9E0D56
+        RET
+    }
+}
+
+void __stdcall runtimeHookRemoveBlock(unsigned short* blockIndex, short* makeEffects)
+{
+    bool isCancelled = false;
+
+    if (gLunaLua.isValid()) {
+        std::shared_ptr<Event> blockRemoveEvent = std::make_shared<Event>("onBlockRemove", true);
+        blockRemoveEvent->setDirectEventName("onBlockRemove");
+        blockRemoveEvent->setLoopable(false);
+        gLunaLua.callEvent(blockRemoveEvent, *blockIndex, *makeEffects != 0, false);
+        isCancelled = blockRemoveEvent->native_cancelled();
+    }
+
+    if (!isCancelled)
+    {
+        removeBlock_OrigFunc(blockIndex, makeEffects);
+    }
+}
+
 static void __stdcall runtimeHookColorSwitch(unsigned int color)
 {
     if (gLunaLua.isValid()) {
@@ -2356,6 +2385,50 @@ _declspec(naked) void __stdcall runtimeHookColorSwitchRedBlock(void)
         ret
     }
 }
+
+
+static _declspec(naked) void __stdcall collectNPC_OrigFunc(short* playerIdx, short* npcIdx)
+{
+    __asm {
+        PUSH EBP
+        MOV EBP, ESP
+        SUB ESP, 0x8
+        PUSH 0xA24CD6
+        RET
+    }
+}
+
+void __stdcall runtimeHookCollectNPC(short* playerIdx, short* npcIdx)
+{
+    PlayerMOB* player = Player::Get(*playerIdx);
+    NPCMOB* npc = NPC::GetRaw(*npcIdx);
+
+    // Duplicate of logic in TouchBonus
+    if (npc->cantHurtPlayerIndex == *playerIdx && !(isCoin_ptr[npc->id] && player->HeldNPCIndex != *npcIdx && npc->killFlag == 0))
+        return;
+
+    // Obscure case of touching a fairy pendant in a clown car.
+    // This is the only case outside of what's above where the NPC won't die.
+    if (npc->id == 254 && player->MountType == 2)
+        return;
+
+    // Call onNPCCollect
+    bool isCancelled = false;
+
+    if (gLunaLua.isValid())
+    {
+        std::shared_ptr<Event> npcCollectEvent = std::make_shared<Event>("onNPCCollect", true);
+        npcCollectEvent->setDirectEventName("onNPCCollect");
+        npcCollectEvent->setLoopable(false);
+        gLunaLua.callEvent(npcCollectEvent, *npcIdx, *playerIdx);
+        
+        if (npcCollectEvent->native_cancelled())
+            return;
+    }
+
+    collectNPC_OrigFunc(playerIdx, npcIdx);
+}
+
 
 static void drawReplacementSplashScreen(void)
 {
@@ -3516,6 +3589,68 @@ __declspec(naked) void __stdcall runtimeHookNPCCollisionGroup(void)
         pop ecx
         pop eax
         push 0xA1BAD5
+        ret
+    }
+}
+
+static unsigned int __stdcall runtimeHookBlockPlayerFilterInternal(PlayerMOB* player, int blockIdx)
+{
+    Block* block = Block::GetRaw(blockIdx);
+
+    // IsHidden flag, which is what the code we're replacing checks for
+    if (block->IsHidden)
+    {
+        return 0;
+    }
+
+    short characterFilter = Blocks::GetBlockPlayerFilter(block->BlockType);
+
+    // -1 means allow all characters
+    if (characterFilter == -1)
+    {
+        return 0;
+    }
+
+    // Matching characters, cancel collision
+    short characterId = (short)player->Identity;
+    if (characterFilter == characterId)
+    {
+        return 0;
+    }
+
+    // No filter needed, carry on
+    return -1;
+}
+
+__declspec(naked) void __stdcall runtimeHookBlockPlayerFilter(void)
+{
+    __asm {
+        push eax                // push these to make sure they're safe after the function call
+        push ecx
+        push edx
+        push esi
+
+        movsx ecx, word ptr ss:[ebp-0x120]
+        push ecx                // Block index
+        push ebx                // Player pointer
+        call runtimeHookBlockPlayerFilterInternal
+
+        cmp eax, 0 // return value
+        jne continue_collision
+        jmp cancel_collision
+    continue_collision:
+        pop esi                 // we can pop these again
+        pop edx
+        pop ecx
+        pop eax
+        push 0x9A16F4
+        ret
+    cancel_collision:
+        pop esi                 // we can pop these again
+        pop edx
+        pop ecx
+        pop eax
+        push 0x9A4FE9
         ret
     }
 }
