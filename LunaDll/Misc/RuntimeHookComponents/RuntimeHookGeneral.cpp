@@ -2105,7 +2105,7 @@ void TrySkipPatch()
         0
     };
 
-    // Skips default terminal velocity code if the player is flying
+    // Skips default terminal velocity code if the player is flying or riding a shell
     PATCH(0x99ED0E)
         .JMP(runtimeHookTerminalVelocityCondition)
         .Apply();
@@ -2357,7 +2357,7 @@ void TrySkipPatch()
         /* 0x99F07C */ .bytes(0xDD, 0x80, 0xA0, 0x00, 0x00, 0x00)                                                    // fld qword ptr [eax + 0xA0]          ; Get standing NPC speedY
         /* 0x99F082 */ .bytes(0xFF, 0x15, 0xBC, 0x10, 0x40, 0x00)                                                    // call __vbaFpR4                      ; Convert dfloat to float
         /* 0x99F088 */ .bytes(0xDF, 0xF1)                                                                            // fcomip st0, st1                     ; Compare shell speed to flyingShellTerminalVelocity then pop shell speed from the fpu register stack
-        /* 0x99F08A */ .bytes(0xDD, 0xD8)                                                                            // fsp st0                             ; Pop flyingShellTerminalVelocity fpu register stack
+        /* 0x99F08A */ .bytes(0xDD, 0xD8)                                                                            // fsp st0                             ; Pop flyingShellTerminalVelocity from the fpu register stack
         /* 0x99F08C */ .JA(0x99F100)                                                                                    // ja 0x99F100                         ; If shell speedY > flyingShellTerminalVelocity, check other conditions at modPlayer.bas @ l. 1706
         /* 0x99F092 */ .JMP(0x99F559)                                                                                   // jmp 0x99F559                        ; Else, go to modPlayer.bas @ l. 1730
                        .Apply();
@@ -2367,10 +2367,9 @@ void TrySkipPatch()
      */
 
     PATCH(0x99F147)
-        .bytes(0x66, 0x0F, 0x1F, 0x44, 0x00, 0x00) // nop
+        .bytes(0x0F, 0x1F, 0x80, 0x00, 0x00, 0x00, 0x00) // nop
         .bytes(0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push dword ptr [ebp - 0x114] ; playerId
         .CALL((uintptr_t) runtimeHookGetPhysicsField<float, &PlayerPhysics::flyingTerminalVelocity>)
-        .NOP()
         .Apply();
 
     // flyingShellTerminalVelocity
@@ -2395,6 +2394,50 @@ void TrySkipPatch()
         .CALL((uintptr_t) runtimeHookGetPhysicsField<float, &PlayerPhysics::switchJumpVelocity>)
         .POP_ECX()
         .bytes(0x0F, 0x1F, 0x80, 0x00, 0x00, 0x00, 0x00) // nop
+        .Apply();
+
+    // shellTerminalVelocity
+    PATCH(0xA10136)
+        .CALL(runtimeHookShellTerminalVelocity)
+        .NOP()
+        .Apply();
+    
+    PATCH(0x99DE14)
+        .bytes(0x74, 0x1D) // jz 0x99DE33
+        .bytes(0x66, 0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push word ptr [ebp - 0x114] ; playerId
+        .PUSH_IMM32(0x99DE33) // return address
+        .JMP(runtimeHookDisableShellSurfing)
+        .Apply();
+    
+    PATCH(0x99E5FB)
+        .bytes(0x0F, 0x1F, 0x40, 0x00) // nop
+        .Apply();
+    
+    PATCH(0x99E61A)
+        .bytes(0x89, 0xFE) // mov esi, edi
+        .bytes(0x66, 0xFF, 0xB5, 0xEC, 0xFE, 0xFF, 0xFF) // push word ptr [ebp - 0x114] ; playerId
+        .PUSH_IMM32(0x99E635) // return address
+        .JMP(runtimeHookDisableShellSurfing)
+        .Apply();
+
+    PATCH(0x9A3C3A)
+        .CALL(runtimeHookDisableShellSurfing_Wrapper_ZeroEdi)
+        .NOP()
+        .Apply();
+    
+    PATCH(0x9B24FC)
+        .CALL(runtimeHookDisableShellSurfing_Wrapper_SkipIfNotEqual_Float)
+        .NOP()
+        .Apply();
+    
+    PATCH(0x9CEB8A)
+        .CALL(runtimeHookEnableShellSurfing_Wrapper)
+        .NOP()
+        .Apply();
+    
+    PATCH(0x9B275B)
+        .CALL(runtimeHookDisableShellSurfing_Wrapper_SkipIfNotEqual_Integer)
+        .NOP()
         .Apply();
 
     // Fix intro level not loading when the save slot number is greater than 3.

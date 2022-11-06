@@ -415,6 +415,7 @@ struct PlayerPhysics {
     float flyingTerminalVelocity; //Unused for link-based characters
     float flyingShellTerminalVelocity; //Unused for link-based characters
     float switchJumpVelocity;
+    float shellTerminalVelocity;
 };
 
 template <typename T, T PlayerPhysics::*field> constexpr std::size_t physicsMemberPos() = delete;
@@ -442,10 +443,12 @@ template <> constexpr std::size_t physicsMemberPos<float, &PlayerPhysics::propel
 template <> constexpr std::size_t physicsMemberPos<float, &PlayerPhysics::flyingTerminalVelocity>() { return 21; };
 template <> constexpr std::size_t physicsMemberPos<float, &PlayerPhysics::flyingShellTerminalVelocity>() { return 22; };
 template <> constexpr std::size_t physicsMemberPos<float, &PlayerPhysics::switchJumpVelocity>() { return 23; };
+template <> constexpr std::size_t physicsMemberPos<float, &PlayerPhysics::shellTerminalVelocity>() { return 24; };
 
 struct ExtendedPlayerFields {
     PlayerPhysics extPhysics;
     unsigned int overridenFields;
+    short riddenShell; // I DON'T want to deal with .StandingOnNPC shenanigans
 };
 
 /* Verify struct is correctly sized, and also verify that a sampling of fields

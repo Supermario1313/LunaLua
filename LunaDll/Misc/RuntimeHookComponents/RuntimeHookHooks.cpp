@@ -1,4 +1,5 @@
 #include <comutil.h>
+#include "Defines.h"
 #include "string.h"
 #include "../../Globals.h"
 #include "../RuntimeHook.h"
@@ -557,6 +558,11 @@ extern void __stdcall NPCKillHook(short* npcIndex_ptr, short* killReason)
         }
     }
 
+    short lastNpcType = NPC::Get(GM_NPCS_COUNT)->id;
+    double lastNpcAi3 = NPC::Get(GM_NPCS_COUNT)->ai3;
+    short killedNpcType = NPC::Get(npcIdx - 1)->id;
+    double killedNpcAi3 = NPC::Get(npcIdx - 1)->ai3;
+
     short oldNpcRemovalConfirmed = npcRemovalConfirmed;
     npcRemovalConfirmed = 0;
 
@@ -573,6 +579,17 @@ extern void __stdcall NPCKillHook(short* npcIndex_ptr, short* killReason)
             *NPC::GetRawExtended(newIdx+1) = *NPC::GetRawExtended(oldIdx+1);
         }
         NPC::GetRawExtended(oldIdx+1)->Reset();
+
+        // A ridden rainbow shell was killed
+        if (killedNpcType == NPCID_FLIPPEDDISCO && killedNpcAi3 > 0) {
+            Player::GetExtended(killedNpcAi3)->riddenShell = 0;
+        }
+
+        // A ridden rainbow shell is being moved to another NPC slot
+        if (lastNpcType == NPCID_FLIPPEDDISCO && lastNpcAi3 > 0 && newIdx != oldIdx) {
+            Player::GetExtended(killedNpcAi3)->riddenShell = newIdx + 1;
+        }
+        
 
         // The NPC was indeed removed
         if (gLunaLua.isValid() && (newIdx >= 0) && (oldIdx >= 0)) {
@@ -3946,7 +3963,7 @@ _declspec(naked) void __stdcall runtimeHookBlockSpeedSet_FSTP_EAX_EDX_EDI(void)
 
 void __stdcall setupCustomPhysics(void) {
     for (int character = 0; character <= 16; character++) {
-        PlayerPhysics &extPhysics = *Player::GetPhysicsForChar(character);
+        PlayerPhysics& extPhysics = *Player::GetPhysicsForChar(character);
 
         extPhysics.jumpHeight = 20;
         extPhysics.noteBlockJumpHeight = 25;
@@ -3972,6 +3989,7 @@ void __stdcall setupCustomPhysics(void) {
         extPhysics.flyingTerminalVelocity = 2.0f;
         extPhysics.flyingShellTerminalVelocity = 2.0f;
         extPhysics.switchJumpVelocity = -0.4f;
+        extPhysics.shellTerminalVelocity = 8.0f;
 
         if (character == 2) {
             extPhysics.jumpHeight += 3;
@@ -4068,10 +4086,10 @@ _declspec(naked) void __stdcall runtimeHookCompareWaterTerminalVelocity(void) {
 short* getValidCharacterIDArray();
 
 static bool __stdcall runtimeHookFlyingTerminalVelocityCondition(int playerID) {
-    PlayerMOB *player = Player::Get(playerID);
-    short *baseCharacterIDs = getValidCharacterIDArray();
+    PlayerMOB* player = Player::Get(playerID);
+    short* baseCharacterIDs = getValidCharacterIDArray();
 
-    return (player->CurrentPowerup == 4 || player->CurrentPowerup == 5 || player->YoshiHasFlight == 0xFFFF || (player->MountType == 1 && player->MountColor == 3)) && (Player::PressingJump(player) || Player::PressingAltJump(player)) && player->Unknown5C != 0xFFFF && player->SlopeRelated == 0 && baseCharacterIDs[player->Identity - 1] != 5;
+    return (player->CurrentPowerup == 4 || player->CurrentPowerup == 5 || player->YoshiHasFlight || (player->MountType == 1 && player->MountColor == 3)) && (Player::PressingJump(player) || Player::PressingAltJump(player)) && !player->Unknown5C && player->SlopeRelated == 0 && baseCharacterIDs[player->Identity - 1] != 5;
 }
 
 _declspec(naked) void __stdcall runtimeHookTerminalVelocityCondition(void) {
@@ -4084,17 +4102,111 @@ _declspec(naked) void __stdcall runtimeHookTerminalVelocityCondition(void) {
             test al, al
             jnz dontChangeSpeed
 
-            push 0x99ED13
-            ret
+            cmp word ptr [ebx + 0x44], 0 // ShellSurf
+            je dontChangeSpeed
+
+            mov eax, 0x99ED13
+            jmp eax
 
         dontChangeSpeed:
-            push 0x99ED2F
-            ret
+            mov eax, 0x99ED2F
+            jmp eax
 
     }
 }
 
-bool __stdcall saveFileExists() {
+void __stdcall runtimeHookEnableShellSurfing(int playerID) {
+    PlayerMOB* player = Player::Get(playerID);
+    ExtendedPlayerFields* extPFields = Player::GetExtended(playerID);
+    NPCMOB* npc = NPC::GetRaw(player->NPCBeingStoodOnIndex);
+
+    extPFields->riddenShell = player->NPCBeingStoodOnIndex;
+    player->UnknownFlag = COMBOOL(true); // ShellSurf
+    npc->ai3 = (double) playerID;
+}
+
+void __stdcall runtimeHookDisableShellSurfing(int playerID) {
+    PlayerMOB* player = Player::Get(playerID);
+    ExtendedPlayerFields* extPFields = Player::GetExtended(playerID);
+
+    player->UnknownFlag = COMBOOL(false); // ShellSurf
+
+    if (extPFields->riddenShell != 0) {
+        NPC::GetRaw(extPFields->riddenShell)->ai3 = 0.0;
+        extPFields->riddenShell = 0;
+    }
+}
+
+_declspec(naked) void __stdcall runtimeHookShellTerminalVelocity(void) {
+    __asm {
+            cmp word ptr [esi + 0xe2], 195 // npc type
+            jne notARiddenShell
+            fld qword ptr [esi + 0x100] // ai3
+            fldz
+            fcomip st(0), st(1)
+            fstp st(0) // pop from fpu stack
+            je notARiddenShell
+            mov dword ptr [esp], esi // npc argument
+            push 0xa10170 // return address
+            jmp runtimeHookUpdateRainbowShellSpeed
+        notARiddenShell:
+            fld qword ptr [esi + 0xa0] // overwritten instruction
+            ret
+    }
+}
+
+void __stdcall runtimeHookUpdateRainbowShellSpeed(NPCMOB* npc) {
+    float shellTerminalVelocity = runtimeHookGetPhysicsField<float, &PlayerPhysics::shellTerminalVelocity>(npc->ai3);
+    PlayerMOB* playerObj = Player::Get(npc->ai3);
+    if (npc->momentum.speedY > shellTerminalVelocity && !playerObj->IsFlying) {
+        npc->momentum.speedY = shellTerminalVelocity;
+    }
+}
+
+_declspec(naked) void __stdcall runtimeHookDisableShellSurfing_Wrapper_ZeroEdi(void) {
+    __asm {
+        xor edi, edi
+        push dword ptr [ebp - 0x114] // playerId
+        call runtimeHookDisableShellSurfing
+        ret
+    }
+}
+
+_declspec(naked) void __stdcall runtimeHookDisableShellSurfing_Wrapper_SkipIfNotEqual_Float(void) {
+    __asm {
+            jz skip
+            push dword ptr [ebp - 0x114] // playerId
+            call runtimeHookDisableShellSurfing
+        skip:
+            ret
+    }
+}
+
+_declspec(naked) void __stdcall runtimeHookEnableShellSurfing_Wrapper(void) {
+    __asm {
+        push eax
+        push edx
+        mov eax, dword ptr [ebp + 0x8] // pointer to playerID
+        movsx eax, word ptr [eax]
+        push eax // playerID
+        call runtimeHookEnableShellSurfing
+        pop edx
+        pop eax
+        ret
+    }
+}
+
+_declspec(naked) void __stdcall runtimeHookDisableShellSurfing_Wrapper_SkipIfNotEqual_Integer(void) {
+    __asm {
+            jne skip
+            push dword ptr [ebp - 0x114] // playerId
+            call runtimeHookDisableShellSurfing
+        skip:
+            ret
+    }
+}
+
+bool __stdcall saveFileExists(void) {
     std::wstring saveFilePath = GM_FULLDIR;
     saveFilePath += L"save";
     saveFilePath += std::to_wstring(GM_CUR_SAVE_SLOT);

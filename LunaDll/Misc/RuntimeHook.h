@@ -8,6 +8,7 @@
 #include "AsmPatch.h"
 #include "../SMBXInternal/PlayerMOB.h"
 #include "../GlobalFuncs.h"
+#include "SMBXInternal/NPCs.h"
 
 struct SMBX_Warp;
 
@@ -577,9 +578,9 @@ void __stdcall setupCustomPhysics(void);
 
 template <typename T, T PlayerPhysics::*field>
 T __stdcall runtimeHookGetPhysicsField(int playerID) {
-    PlayerMOB *player = Player::Get(playerID);
-    ExtendedPlayerFields *extFields = Player::GetExtended(playerID);
-    PlayerPhysics *globalPhysics = Player::GetPhysicsForChar(player->Identity);
+    PlayerMOB* player = Player::Get(playerID);
+    ExtendedPlayerFields* extFields = Player::GetExtended(playerID);
+    PlayerPhysics* globalPhysics = Player::GetPhysicsForChar(player->Identity);
 
     if (extFields->overridenFields & (1 << physicsMemberPos<T, field>())) { // global field overriden
         return extFields->extPhysics.*field;
@@ -595,7 +596,7 @@ void __stdcall runtimeHookUpdateJumpingForce(int playerID) {
 
 template <short PlayerPhysics::*jumpField, short PlayerPhysics::*spinjumpField>
 void __stdcall runtimeHookUpdateJumpingAndSpinjumpingForce(int playerID) {
-    PlayerMOB *player = Player::Get(playerID);
+    PlayerMOB* player = Player::Get(playerID);
 
     if (player->IsSpinjumping) {
         runtimeHookUpdateJumpingForce<spinjumpField>(playerID);
@@ -610,11 +611,19 @@ float __stdcall runtimeHookMinimalPMeterSpeedVars_Wrapper(void);
 float __stdcall runtimeHookWaterGravityVars_Wrapper(void);
 void __stdcall runtimeHookCompareWaterTerminalVelocity(void);
 void __stdcall runtimeHookTerminalVelocityCondition(void);
+void __stdcall runtimeHookEnableShellSurfing(int playerID);
+void __stdcall runtimeHookDisableShellSurfing(int playerID);
+void __stdcall runtimeHookShellTerminalVelocity(void);
+void __stdcall runtimeHookUpdateRainbowShellSpeed(NPCMOB* npc);
+void __stdcall runtimeHookDisableShellSurfing_Wrapper_ZeroEdi(void);
+void __stdcall runtimeHookDisableShellSurfing_Wrapper_SkipIfNotEqual_Float(void);
+void __stdcall runtimeHookEnableShellSurfing_Wrapper(void);
+void __stdcall runtimeHookDisableShellSurfing_Wrapper_SkipIfNotEqual_Integer(void);
 
 bool __stdcall saveFileExists(void);
 
-void __stdcall runtimeHookSetPlayerFenceSpeed(PlayerMOB *player);
-bool __stdcall runtimeHookIncreaseFenceFrameCondition(PlayerMOB *player);
+void __stdcall runtimeHookSetPlayerFenceSpeed(PlayerMOB* player);
+bool __stdcall runtimeHookIncreaseFenceFrameCondition(PlayerMOB* player);
 void __stdcall runtimeHookUpdateBGOMomentum(int bgoId, int layerId);
 
 #endif

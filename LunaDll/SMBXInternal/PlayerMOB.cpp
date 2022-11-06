@@ -2,6 +2,7 @@
 #include "../Defines.h"
 #include "../Misc/MiscFuncs.h"
 #include "NPCs.h"
+#include <cstdint>
 
 // ACCESSORS
 PlayerMOB* Player::Get(int index) {
@@ -9,15 +10,17 @@ PlayerMOB* Player::Get(int index) {
 }
 
 int Player::GetIdx(PlayerMOB *player) {
-    int idx = (PlayerMOB*)GM_PLAYERS_PTR - player;
+    std::uintptr_t const playerAddr = (std::uintptr_t) player;
+    std::uintptr_t const playerArray = (std::uintptr_t) GM_PLAYERS_PTR;
+    std::uintptr_t const templateArray = (std::uintptr_t) GM_PLAYERS_TEMPLATE;
 
-    if (0 <= idx && idx <= 200) return idx;
-
-    idx = (PlayerMOB*)GM_PLAYERS_TEMPLATE - player;
-
-    if (0 <= idx && idx <= 10) return idx + 1000;
-
-    return -1;
+    if (playerArray <= playerAddr && playerAddr <= playerArray + 200 * sizeof(PlayerMOB)) {
+        return (PlayerMOB*)GM_PLAYERS_PTR - player;
+    } else if (templateArray <= playerAddr && playerAddr <= templateArray + 10 * sizeof(PlayerMOB)) {
+        return (PlayerMOB*)GM_PLAYERS_TEMPLATE - player + 1000;
+    } else {
+        return -1;
+    }
 }
 
 

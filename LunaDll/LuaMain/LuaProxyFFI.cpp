@@ -490,6 +490,7 @@ struct PlayerPhysics {\
     float flyingTerminalVelocity;\
     float flyingShellTerminalVelocity;\
     float switchJumpVelocity;\
+    float shellTerminalVelocity;\
 };";
     }
 
@@ -502,6 +503,7 @@ struct PlayerPhysics {\
 struct ExtendedPlayerFields {\
     PlayerPhysics extPhysics;\
     unsigned int overridenFields;\
+    short riddenShell;\
 };";
     }
     
