@@ -2440,6 +2440,12 @@ void TrySkipPatch()
         .NOP()
         .Apply();
 
+    // doubleJumpHeight
+    PATCH(0x99DB3B)
+        .CALL(runtimeHookSetDoubleJumpFrames)
+        .bytes(0x0F, 0x1F, 0x40, 0x00) // nop
+        .Apply();
+
     // Fix intro level not loading when the save slot number is greater than 3.
     PATCH(0x8CDE97)
         .PUSH_IMM32(0x8CDEC7)

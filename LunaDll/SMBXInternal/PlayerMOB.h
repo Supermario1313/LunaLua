@@ -416,6 +416,7 @@ struct PlayerPhysics {
     float flyingShellTerminalVelocity; //Unused for link-based characters
     float switchJumpVelocity;
     float shellTerminalVelocity;
+    short doubleJumpHeight;
 };
 
 template <typename T, T PlayerPhysics::*field> constexpr std::size_t physicsMemberPos() = delete;
@@ -444,6 +445,7 @@ template <> constexpr std::size_t physicsMemberPos<float, &PlayerPhysics::flying
 template <> constexpr std::size_t physicsMemberPos<float, &PlayerPhysics::flyingShellTerminalVelocity>() { return 22; };
 template <> constexpr std::size_t physicsMemberPos<float, &PlayerPhysics::switchJumpVelocity>() { return 23; };
 template <> constexpr std::size_t physicsMemberPos<float, &PlayerPhysics::shellTerminalVelocity>() { return 24; };
+template <> constexpr std::size_t physicsMemberPos<short, &PlayerPhysics::doubleJumpHeight>() { return 25; };
 
 struct ExtendedPlayerFields {
     PlayerPhysics extPhysics;

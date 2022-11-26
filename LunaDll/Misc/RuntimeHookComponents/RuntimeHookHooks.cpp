@@ -3990,6 +3990,7 @@ void __stdcall setupCustomPhysics(void) {
         extPhysics.flyingShellTerminalVelocity = 2.0f;
         extPhysics.switchJumpVelocity = -0.4f;
         extPhysics.shellTerminalVelocity = 8.0f;
+        extPhysics.doubleJumpHeight = 10;
 
         if (character == 2) {
             extPhysics.jumpHeight += 3;
@@ -4203,6 +4204,18 @@ _declspec(naked) void __stdcall runtimeHookDisableShellSurfing_Wrapper_SkipIfNot
             call runtimeHookDisableShellSurfing
         skip:
             ret
+    }
+}
+
+static void __stdcall updateDoubleJumpingForce(int playerId) {
+    runtimeHookUpdateJumpingForce<&PlayerPhysics::doubleJumpHeight>(playerId);
+}
+
+_declspec(naked) void __stdcall runtimeHookSetDoubleJumpFrames(void) {
+    __asm {
+        push dword ptr [ebp - 0x114] // playerId
+        call updateDoubleJumpingForce
+        ret
     }
 }
 

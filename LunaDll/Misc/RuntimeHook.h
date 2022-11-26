@@ -619,6 +619,7 @@ void __stdcall runtimeHookDisableShellSurfing_Wrapper_ZeroEdi(void);
 void __stdcall runtimeHookDisableShellSurfing_Wrapper_SkipIfNotEqual_Float(void);
 void __stdcall runtimeHookEnableShellSurfing_Wrapper(void);
 void __stdcall runtimeHookDisableShellSurfing_Wrapper_SkipIfNotEqual_Integer(void);
+void __stdcall runtimeHookSetDoubleJumpFrames(void);
 
 bool __stdcall saveFileExists(void);
 

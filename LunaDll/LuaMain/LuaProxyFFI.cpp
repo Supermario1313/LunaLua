@@ -491,6 +491,7 @@ struct PlayerPhysics {\
     float flyingShellTerminalVelocity;\
     float switchJumpVelocity;\
     float shellTerminalVelocity;\
+    short doubleJumpHeight;\
 };";
     }
 
