@@ -17,6 +17,7 @@
 #include "../../Rendering/GL/GLEngine.h"
 #include "../../Main.h"
 #include <IniProcessor/ini_processing.h>
+#include <limits>
 
 #include "../RunningStat.h"
 #include "../../Rendering/BitBltEmulation.h"
@@ -4093,21 +4094,46 @@ static bool __stdcall runtimeHookFlyingTerminalVelocityCondition(int playerID) {
     return (player->CurrentPowerup == 4 || player->CurrentPowerup == 5 || player->YoshiHasFlight || (player->MountType == 1 && player->MountColor == 3)) && (Player::PressingJump(player) || Player::PressingAltJump(player)) && !player->Unknown5C && player->SlopeRelated == 0 && baseCharacterIDs[player->Identity - 1] != 5;
 }
 
+static void __stdcall runtimeHookShellTerminalVelocityForPlayer(int playerId, bool isFlying) {
+    PlayerMOB* player = Player::Get(playerId);
+    if (isFlying) {
+        player->momentum.speedY = std::nextafter(runtimeHookGetPhysicsField<float, &PlayerPhysics::flyingShellTerminalVelocity>(playerId), std::numeric_limits<double>::infinity());
+    } else {
+        player->momentum.speedY = std::nextafter(runtimeHookGetPhysicsField<float, &PlayerPhysics::shellTerminalVelocity>(playerId), std::numeric_limits<double>::infinity());
+    }
+} 
+
 _declspec(naked) void __stdcall runtimeHookTerminalVelocityCondition(void) {
     __asm {
-            test ah, 0x41
-            jnz dontChangeSpeed
+            push eax // save FPU status word
 
             push dword ptr [ebp - 0x114] // playerId
-            call runtimeHookFlyingTerminalVelocityCondition
-            test al, al
-            jnz dontChangeSpeed
+            call runtimeHookFlyingTerminalVelocityCondition // Stores whether the player is flying or not in al
 
-            cmp word ptr [ebx + 0x44], 0 // ShellSurf
-            je dontChangeSpeed
+            cmp word ptr [ebx + 0x44], 0 // If shellsurfing...
+            jne handleShellSurfing // ..go to shellsurf handling code
+
+            test al, al // If flying...
+            jnz dontChangeSpeed_discardFPUStatus // ...skip player speedY checking since it was already checked earlier
+
+            pop eax // restore FPU status word
+
+            test ah, 0x41 // If speedY is smaller than terminalVelocity...
+            jnz dontChangeSpeed // ...don't change player speed
 
             mov eax, 0x99ED13
             jmp eax
+        
+        handleShellSurfing:
+            add esp, 4 // Discard saved FPU status word
+            movzx eax, al
+            push eax
+            push dword ptr [ebp - 0x114] // playerId
+            push 0x99ED2F // return address
+            jmp runtimeHookShellTerminalVelocityForPlayer
+        
+        dontChangeSpeed_discardFPUStatus:
+            add esp, 4 // Discard saved FPU status word
 
         dontChangeSpeed:
             mov eax, 0x99ED2F
