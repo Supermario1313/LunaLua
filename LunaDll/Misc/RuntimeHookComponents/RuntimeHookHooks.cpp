@@ -542,6 +542,15 @@ extern void __stdcall doEventsLevelEditorHook()
     GetProcAddress(vmVB6Lib, "rtcDoEvents")();*/
 }
 
+static void __stdcall runtimeHookShellDismount(short npcIdx, short playerIdx) {
+    if (gLunaLua.isValid()) {
+        std::shared_ptr<Event> shellDismountEvent = std::make_shared<Event>("onShellDismount", false);
+        shellDismountEvent->setDirectEventName("onShellDismount");
+        shellDismountEvent->setLoopable(false);
+        gLunaLua.callEvent(shellDismountEvent, playerIdx, npcIdx);
+    }
+}
+
 static unsigned short npcRemovalConfirmed = 0;
 
 extern void __stdcall NPCKillHook(short* npcIndex_ptr, short* killReason)
@@ -564,6 +573,12 @@ extern void __stdcall NPCKillHook(short* npcIndex_ptr, short* killReason)
     short killedNpcType = NPC::Get(npcIdx - 1)->id;
     double killedNpcAi3 = NPC::Get(npcIdx - 1)->ai3;
 
+    // A ridden rainbow shell was killed/despawned
+    if (killedNpcType == NPCID_FLIPPEDDISCO && killedNpcAi3 > 0) {
+        runtimeHookShellDismount(npcIdx, killedNpcAi3);
+        Player::GetExtended(killedNpcAi3)->riddenShell = 0;
+    }
+
     short oldNpcRemovalConfirmed = npcRemovalConfirmed;
     npcRemovalConfirmed = 0;
 
@@ -580,11 +595,6 @@ extern void __stdcall NPCKillHook(short* npcIndex_ptr, short* killReason)
             *NPC::GetRawExtended(newIdx+1) = *NPC::GetRawExtended(oldIdx+1);
         }
         NPC::GetRawExtended(oldIdx+1)->Reset();
-
-        // A ridden rainbow shell was killed
-        if (killedNpcType == NPCID_FLIPPEDDISCO && killedNpcAi3 > 0) {
-            Player::GetExtended(killedNpcAi3)->riddenShell = 0;
-        }
 
         // A ridden rainbow shell is being moved to another NPC slot
         if (lastNpcType == NPCID_FLIPPEDDISCO && lastNpcAi3 > 0 && newIdx != oldIdx) {
@@ -4150,18 +4160,26 @@ void __stdcall runtimeHookEnableShellSurfing(int playerID) {
     extPFields->riddenShell = player->NPCBeingStoodOnIndex;
     player->UnknownFlag = COMBOOL(true); // ShellSurf
     npc->ai3 = (double) playerID;
+
+    if (gLunaLua.isValid()) {
+        std::shared_ptr<Event> shellMountEvent = std::make_shared<Event>("onShellMount", false);
+        shellMountEvent->setDirectEventName("onShellMount");
+        shellMountEvent->setLoopable(false);
+        gLunaLua.callEvent(shellMountEvent, playerID, extPFields->riddenShell);
+    }
 }
 
 void __stdcall runtimeHookDisableShellSurfing(int playerID) {
     PlayerMOB* player = Player::Get(playerID);
     ExtendedPlayerFields* extPFields = Player::GetExtended(playerID);
 
-    player->UnknownFlag = COMBOOL(false); // ShellSurf
-
     if (extPFields->riddenShell != 0) {
+        runtimeHookShellDismount(extPFields->riddenShell, playerID);
         NPC::GetRaw(extPFields->riddenShell)->ai3 = 0.0;
         extPFields->riddenShell = 0;
     }
+
+    player->UnknownFlag = COMBOOL(false); // ShellSurf
 }
 
 _declspec(naked) void __stdcall runtimeHookShellTerminalVelocity(void) {
