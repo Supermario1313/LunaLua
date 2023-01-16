@@ -179,7 +179,7 @@ void fixup_RenderPlayerJiterX();
 template <int priority>
 _declspec(naked) static void __stdcall _RenderBelowPriorityHookImpl() {
 #ifdef __clang__
-    // NB: I'm using %c modifiers for PriorityMostSignificantDWord and PriorityLeastSignificantDWord because of a clang bug: https://bugs.llvm.org/show_bug.cgi?id=24232
+    // NB: I'm using %c modifiers for PriorityMostSignificantDWord and PriorityLeastSignificantDWord because of a clang bug: https://github.com/llvm/llvm-project/issues/24606
     __asm__ volatile (
         ".intel_syntax\n"
         "pushfd\n"
@@ -233,7 +233,7 @@ static inline constexpr void* GetRenderBelowPriorityHook(void) {
 template <int priority, unsigned int skipTargetAddr, bool* skipAddr>
 _declspec(naked) static void __stdcall _RenderBelowPriorityHookWithSkipImpl() {
 #ifdef __clang__
-    // NB: I'm using %c modifiers for PriorityMostSignificantDWord, PriorityLeastSignificantDWord, skipTargetAddrValue and skipTargetAddrValue because of a clang bug: https://bugs.llvm.org/show_bug.cgi?id=24232
+    // NB: I'm using %c modifiers for PriorityMostSignificantDWord, PriorityLeastSignificantDWord, skipTargetAddrValue and skipTargetAddrValue because of a clang bug: https://github.com/llvm/llvm-project/issues/24606
     __asm__ volatile (
         ".intel_syntax\n"
         "pushfd\n"
@@ -307,11 +307,16 @@ static inline constexpr void* GetRenderBelowPriorityHookWithSkip(void) {
 }
 
 // Extended Character Id Support
+short getBaseCharacter(short id);
+short* getValidCharacterIDArray();
+PlayerMOB* getTemplateForCharacter(int id);
 void runtimeHookCharacterIdApplyPatch();
+void runtimeHookCharacterIdUnpplyPatch();
 void runtimeHookCharacterIdRegister(short id, const std::string& name, short base, short filterBlock, short switchBlock, short deathEffect);
 void runtimeHookCharacterIdUnregister(short id);
 void runtimeHookCharacterIdReset();
 CharacterHitBoxData* runtimeHookGetExtCharacterHitBoxData(short characterId, short powerupId);
+PlayerPhysics* runtimeHookGetExtCharacterPhysics(short characterId);
 
 // Game Mode Handling
 void __stdcall runtimeHookSmbxChangeModeHookRaw(void);

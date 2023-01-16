@@ -67,6 +67,7 @@ public:
         mStoredTemplate.MountColor = 0;
         mStoredTemplate.Hearts = 1;
         memset(mHitbox, 0, 10*sizeof(CharacterHitBoxData));
+        memset(&mPhysics, 0, sizeof(PlayerPhysics));
         if (mFilterBlock != 0)
         {
             Blocks::SetBlockPlayerFilter(mFilterBlock, mId);
@@ -93,6 +94,7 @@ public:
     short mDeathEffect;
     PlayerMOB mStoredTemplate;
     CharacterHitBoxData mHitbox[10];
+    PlayerPhysics mPhysics;
 };
 
 // Static Data
@@ -2069,6 +2071,21 @@ static Patchable* runtimeHookCharacterIdPatchList[] = {
 // Hook support code //
 ///////////////////////
 
+short getBaseCharacter(short characterId) {
+    // Vanilla ones are always unchanged
+    if (characterId <= 5) {
+        return characterId;
+    }
+
+    // Return mapped character id
+    auto it = runtimeHookCharacterIdMap.find(characterId);
+    if (it != runtimeHookCharacterIdMap.end()) {
+        return it->second->mBaseCharacter;
+    }
+
+    return 0;
+}
+
 short* getValidCharacterIDArray()
 {
     static short* ret = nullptr;
@@ -2151,22 +2168,7 @@ static PlayerMOB* getTemplateForCharacterWithDummyFallback(int id)
 
 static int __stdcall runtimeHookCharacterIdTranslateHook(short* idPtr)
 {
-    short characterId = *idPtr;
-
-    // Vanilla ones are always unchanged
-    if (characterId <= 5)
-    {
-        return characterId;
-    }
-
-    // Return mapped character id
-    auto it = runtimeHookCharacterIdMap.find(characterId);
-    if (it != runtimeHookCharacterIdMap.end())
-    {
-        return it->second->mBaseCharacter;
-    }
-
-    return 0;
+    return getBaseCharacter(*idPtr);
 }
 
 ///////////
@@ -2526,6 +2528,19 @@ CharacterHitBoxData* runtimeHookGetExtCharacterHitBoxData(short characterId, sho
     if (it != runtimeHookCharacterIdMap.end())
     {
         return &it->second->mHitbox[powerupId];
+    }
+
+    return nullptr;
+}
+
+PlayerPhysics* runtimeHookGetExtCharacterPhysics(short characterId) {
+    if (characterId >= 1 && characterId <= 5) {
+        return nullptr;
+    }
+
+    auto it = runtimeHookCharacterIdMap.find(characterId);
+    if (it != runtimeHookCharacterIdMap.end()) {
+        return &it->second->mPhysics;
     }
 
     return nullptr;

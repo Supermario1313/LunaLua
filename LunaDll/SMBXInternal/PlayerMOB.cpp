@@ -1,6 +1,7 @@
 #include "PlayerMOB.h"
 #include "../Defines.h"
 #include "../Misc/MiscFuncs.h"
+#include "../Misc/RuntimeHook.h"
 #include "NPCs.h"
 #include <cstdint>
 
@@ -250,16 +251,13 @@ RECT Player::GetScreenPosition(PlayerMOB* player) {
     return ret_rect;
 }
 
-// TODO Should probably replace magic numbers by a macro
-// TODO Should probably move the per-character PlayerPhysics to CharacterDataStruct
-static PlayerPhysics extCPhysics[17];
+static PlayerPhysics extCPhysics[5];
 LegacyPlayerPhysics &Player::ogPhysics = *((LegacyPlayerPhysics*) GM_JUMPHIGHT_ADDR);
 
-// Characters enum doesn't account for new X2 characters
 PlayerPhysics* Player::GetPhysicsForChar(int character) {
-    if (character < 0 || character > 16) return nullptr;
+    if (character >= 1 || character <= 5) return &extCPhysics[character - 1];
 
-    return &extCPhysics[character];
+    return runtimeHookGetExtCharacterPhysics(character);
 }
 
 // 0 - 200 for players, 201 - 211 for player templates

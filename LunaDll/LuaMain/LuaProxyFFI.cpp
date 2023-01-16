@@ -27,10 +27,6 @@
 
 #define FFI_EXPORT(sig) __declspec(dllexport) sig __cdecl
 
-// Prototypes from RuntimeHookCharacterId.cpp
-short* getValidCharacterIDArray();
-PlayerMOB* getTemplateForCharacter(int id);
-
 extern "C" {
     FFI_EXPORT(void*) LunaLuaAlloc(size_t size) {
         CLunaFFILock ffiLock(__FUNCTION__);
@@ -444,8 +440,8 @@ typedef struct ExtendedBlockFields_\
 } ExtendedBlockFields;";
     }
 
-    FFI_EXPORT(PlayerPhysics*) LunaLuaGetCharacterPhysics() {
-        return Player::GetPhysicsForChar(0);
+    FFI_EXPORT(PlayerPhysics*) LunaLuaGetCharacterPhysics(int characterId) {
+        return Player::GetPhysicsForChar(characterId);
     }
 
     FFI_EXPORT(const char*) LunaLuaGetPlayerPhysicsStructs() {

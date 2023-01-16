@@ -4094,14 +4094,10 @@ _declspec(naked) void __stdcall runtimeHookCompareWaterTerminalVelocity(void) {
     }
 }
 
-// Prototype from RuntimeHookCharacterId.cpp
-short* getValidCharacterIDArray();
-
 static bool __stdcall runtimeHookFlyingTerminalVelocityCondition(int playerID) {
     PlayerMOB* player = Player::Get(playerID);
-    short* baseCharacterIDs = getValidCharacterIDArray();
 
-    return (player->CurrentPowerup == 4 || player->CurrentPowerup == 5 || player->YoshiHasFlight || (player->MountType == 1 && player->MountColor == 3)) && (Player::PressingJump(player) || Player::PressingAltJump(player)) && !player->Unknown5C && player->SlopeRelated == 0 && baseCharacterIDs[player->Identity - 1] != 5;
+    return (player->CurrentPowerup == 4 || player->CurrentPowerup == 5 || player->YoshiHasFlight || (player->MountType == 1 && player->MountColor == 3)) && (Player::PressingJump(player) || Player::PressingAltJump(player)) && !player->Unknown5C && player->SlopeRelated == 0 && getBaseCharacter(player->Identity) != 5;
 }
 
 static void __stdcall runtimeHookShellTerminalVelocityForPlayer(int playerId, bool isFlying) {
