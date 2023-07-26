@@ -105,13 +105,13 @@ namespace Blocks {
     void SetBlockPlayerFilter(int id, short characterId);
     short GetBlockNPCFilter(int id);
     void SetBlockNPCFilter(int id, short npcId);
-    short GetBlockHitId(int id);
+    short __fastcall GetBlockHitId(int id);
     void SetBlockHitId(int id, short hitId);
-    bool GetBlockBreakable(int id);
+    bool __fastcall GetBlockBreakable(int id);
     void SetBlockBreakable(int id, bool breakable);
-    short GetBlockBreakEffectId(int id);
+    short __fastcall GetBlockBreakEffectId(int id);
     void SetBlockBreakEffectId(int id, short breakEffectId);
-    short GetBlockBreakSoundId(int id);
+    short __fastcall GetBlockBreakSoundId(int id);
     void SetBlockBreakSoundId(int id, short breakSoundId);
 
 

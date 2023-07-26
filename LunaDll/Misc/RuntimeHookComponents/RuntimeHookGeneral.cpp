@@ -2053,4 +2053,13 @@ void TrySkipPatch()
         .bytes(0x84, 0xC0) // test al, al
         .bytes(0x74, 0x35) // jz 0x8CDF00
         .Apply();
+    
+    // hitid patches, code from 0x9DB90E to 0x9DB984 is made unused
+    PATCH(0x9DB900)
+        .bytes(0x66, 0x8B, 0x4B, 0x1E) // mov cx, word ptr [ebx + 0x1e] ; blockId
+        .CALL(Blocks::GetBlockHitId)      // call Blocks::GetBlockHitId
+        .bytes(0x0F, 0xBF, 0xF8)       // movsx edi, ax
+        .bytes(0xEB, 0x77)             // jmp 0x9DB985
+        .Apply();
+
 }

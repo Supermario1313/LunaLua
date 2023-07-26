@@ -251,7 +251,7 @@ void Blocks::SetBlockNPCFilter(int id, short npcId)
     blockprop_npcfilter[id] = npcId;
 }
 
-short Blocks::GetBlockHitId(int id)
+short __fastcall Blocks::GetBlockHitId(int id)
 {
     if ((id < 1) || (id > Block::MAX_ID)) return 0;
     return blockprop_hitid[id];
@@ -263,7 +263,7 @@ void Blocks::SetBlockHitId(int id, short hitId)
     blockprop_hitid[id] = hitId;
 }
 
-bool Blocks::GetBlockBreakable(int id)
+bool __fastcall Blocks::GetBlockBreakable(int id)
 {
     if ((id < 1) || (id > Block::MAX_ID)) return false;
     return (blockprop_breakable[id] != 0);
@@ -275,7 +275,7 @@ void Blocks::SetBlockBreakable(int id, bool breakable)
     blockprop_breakable[id] = breakable ? -1 : 0;
 }
 
-short Blocks::GetBlockBreakEffectId(int id) {
+short __fastcall Blocks::GetBlockBreakEffectId(int id) {
     if ((id < 1) || (id > Block::MAX_ID)) return 0;
     return blockprop_breakeffectid[id];
 }
@@ -285,12 +285,12 @@ void Blocks::SetBlockBreakEffectId(int id, short breakEffectId) {
     blockprop_breakeffectid[id] = breakEffectId;
 }
 
-short GetBlockBreakSoundId(int id) {
+short __fastcall Blocks::GetBlockBreakSoundId(int id) {
     if ((id < 1) || (id > Block::MAX_ID)) return 0;
     return blockprop_breaksoundid[id];
 }
 
-void SetBlockBreakSoundId(int id, short breakSoundId) {
+void Blocks::SetBlockBreakSoundId(int id, short breakSoundId) {
     if ((id < 1) || (id > Block::MAX_ID)) return;
     blockprop_breaksoundid[id] = breakSoundId;
 }
