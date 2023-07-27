@@ -2054,12 +2054,39 @@ void TrySkipPatch()
         .bytes(0x74, 0x35) // jz 0x8CDF00
         .Apply();
     
-    // hitid patches, code from 0x9DB90E to 0x9DB984 is made unused
+    // main hitid patch, code from 0x9DB90E to 0x9DB984 is made unused
     PATCH(0x9DB900)
-        .bytes(0x66, 0x8B, 0x4B, 0x1E) // mov cx, word ptr [ebx + 0x1e] ; blockId
+        .bytes(0x0F, 0xBF, 0x4B, 0x1E) // movsx ecx, word ptr [ebx + 0x1e] ; blockId
         .CALL(Blocks::GetBlockHitId)      // call Blocks::GetBlockHitId
         .bytes(0x0F, 0xBF, 0xF8)       // movsx edi, ax
         .bytes(0xEB, 0x77)             // jmp 0x9DB985
         .Apply();
 
+    // the following patch removes special hitid handling for note blocks
+    PATCH(0x9DC903)
+        .bytes(0x0f, 0x1f, 0x84, 0x00, 0x00, 0x00, 0x00, 0x00) // nop
+        .bytes(0x0f, 0x1f, 0x00) // nop
+        .Apply();
+    
+    std::uint32_t constexpr noteBlockHitPatchAddresses[] {
+        0x9DC9A7,
+        0x9DDA69,
+        0x9DE1B1,
+        0x9DE90D,
+        0x9DF2AC,
+        0x9DF6CA,
+        0x9DFBDE,
+        0x9E00F0,
+        0
+    };
+
+    for (std::uint32_t const* i = noteBlockHitPatchAddresses; *i != 0; i++) {
+        PATCH(*i)
+            .bytes(0x0F, 0x1F, 0x44, 0x00, 0x00) // nop
+            .Apply();
+        
+        PATCH(*i + 0xB)
+            .bytes(0x66, 0x90) // nop
+            .Apply();
+    }
 }

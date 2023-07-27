@@ -1,6 +1,7 @@
 #include "Blocks.h"
 #include "PlayerMOB.h"
 #include <cstdint>
+#include <string>
 #include <utility>
 #include <algorithm>
 
