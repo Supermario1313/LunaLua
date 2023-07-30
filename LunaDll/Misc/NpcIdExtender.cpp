@@ -518,21 +518,13 @@ void PatchBlockIdLimit()
 
     // Some others that were missed...
     PATCH(0x9DC913).dword(newLimit).Apply();
-    PATCH(0x9DC92B).dword(newLimit).Apply();
     PATCH(0x9DC9B9).dword(newLimit).Apply();
     PATCH(0x9DC9D7).dword(newLimit).Apply();
     PATCH(0x9DDA85).dword(newLimit).Apply();
-    PATCH(0x9DDA94).dword(newLimit).Apply();
     PATCH(0x9DE1C5).dword(newLimit).Apply();
-    PATCH(0x9DE1E2).dword(newLimit).Apply();
-    PATCH(0x9DF2C0).dword(newLimit).Apply();
-    PATCH(0x9DF2DD).dword(newLimit).Apply();
     PATCH(0x9DF6DC).dword(newLimit).Apply();
-    PATCH(0x9DF6FA).dword(newLimit).Apply();
     PATCH(0x9DFBF2).dword(newLimit).Apply();
-    PATCH(0x9DFC10).dword(newLimit).Apply();
     PATCH(0x9E0104).dword(newLimit).Apply();
-    PATCH(0x9E0122).dword(newLimit).Apply();
     PATCH(0xA1257A).dword(newLimit).Apply();
     PATCH(0xA52740).word(newLimit).Apply();
 

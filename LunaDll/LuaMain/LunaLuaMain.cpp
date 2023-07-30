@@ -30,6 +30,7 @@
 #include "../Misc/LoadScreen.h"
 
 #include "LunaPathValidator.h"
+#include "SMBXInternal/Blocks.h"
 
 /*static*/ DWORD CLunaFFILock::currentLockTlsIdx = TlsAlloc();
 
@@ -541,6 +542,10 @@ void CLunaLua::setupDefaults()
     _G["MOUSE_EVT_DBL"]  = MouseHandler::EVT_DBL;
     _G["MOUSE_WHEEL_V"]  = MouseHandler::WHEEL_V;
     _G["MOUSE_WHEEL_H"]  = MouseHandler::WHEEL_H;
+
+    _G["KEEP_SIZE_ONHIT_NO"] = (short) Blocks::KeepSizeOnHit::NO;
+    _G["KEEP_SIZE_ONHIT_CENTER"] = (short) Blocks::KeepSizeOnHit::CENTER;
+    _G["KEEP_SIZE_ONHIT_YES"] = (short) Blocks::KeepSizeOnHit::YES;
 
     _G["ODIR_UP"] = 1;
     _G["ODIR_LEFT"] = 2;

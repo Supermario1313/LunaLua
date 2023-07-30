@@ -1,4 +1,5 @@
 #include <comutil.h>
+#include "Defines.h"
 #include "string.h"
 #include "../../Globals.h"
 #include "../RuntimeHook.h"
@@ -16,7 +17,6 @@
 #include "../../Rendering/GL/GLEngine.h"
 #include "../../Main.h"
 #include <IniProcessor/ini_processing.h>
-
 #include "../RunningStat.h"
 #include "../../Rendering/BitBltEmulation.h"
 #include "../../Rendering/RenderUtils.h"
@@ -4309,5 +4309,37 @@ _declspec(naked) void __stdcall runtimeHookPlayerKillLavaSolidExit(short* player
     runtimeHookPlayerKillLavaSolidExit_IsFalse:
         push 0x9A5015 // Normal return address, treats lava that would harm as passthrough
         ret
+    }
+}
+
+void __fastcall runtimeHookUpdateBlockAfterHit(Block* blockPtr, short oldBlockType) {
+    Blocks::KeepSizeOnHit const keepSizeOnHit = Blocks::GetBlockKeepSizeOnHit(oldBlockType);
+
+    if (keepSizeOnHit != Blocks::KeepSizeOnHit::YES) {
+        double const oldWidth = blockPtr->momentum.width;
+        double const oldHeight = blockPtr->momentum.height;
+
+        // Update block size
+        blockPtr->momentum.width = blockdef_width[blockPtr->BlockType];
+        blockPtr->momentum.height = blockdef_height[blockPtr->BlockType];
+
+        if (keepSizeOnHit == Blocks::KeepSizeOnHit::CENTER) {
+            double const oldX = blockPtr->momentum.x;
+
+            // Center block
+            blockPtr->momentum.x += (oldWidth - blockPtr->momentum.width) / 2;
+            blockPtr->momentum.y += (oldHeight - blockPtr->momentum.height) / 2;
+
+            if (blockPtr->momentum.x == oldX && blockPtr->momentum.width == oldWidth) {
+                // Don't mark the array as unsorted if the block's x position and width didn't change
+                return;
+            } 
+        } else if (blockPtr->momentum.width == oldWidth) {
+            // Don't mark the array as unsorted if the block's x position didn't change
+            return;
+        }
+
+        // Mark block array as unsorted if neccesary
+        markBlocksUnsorted();
     }
 }

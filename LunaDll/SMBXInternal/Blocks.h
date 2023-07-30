@@ -98,6 +98,12 @@ namespace Blocks {
     void DoSortingIfRequired(); // Will the block array sort if needed.
     void SetNextFrameSorting(); // This will activate the flag for making sorting available through "DoSortingIfRequired"
 
+    enum class KeepSizeOnHit : short {
+        NO = 0,
+        CENTER = 1,
+        YES = 2
+    };
+
     void InitProperties();
     bool GetBlockBumpable(int id);
     void SetBlockBumpable(int id, bool bumpable);
@@ -113,6 +119,9 @@ namespace Blocks {
     void SetBlockBreakEffectId(int id, short breakEffectId);
     short __fastcall GetBlockBreakSoundId(int id);
     void SetBlockBreakSoundId(int id, short breakSoundId);
+    KeepSizeOnHit GetBlockKeepSizeOnHit(int id);
+    void SetBlockKeepSizeOnHit(int id, KeepSizeOnHit keepSizeOnHit);
+    
 
 
     uintptr_t GetPropertyTableAddress(const std::string& s);

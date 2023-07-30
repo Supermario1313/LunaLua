@@ -5,6 +5,7 @@
 #include <string>
 #include "../Defines.h"
 #include "../SMBXInternal/PlayerMOB.h"
+#include "../SMBXInternal/Blocks.h"
 #include "AsmPatch.h"
 #include "../GlobalFuncs.h"
 
@@ -594,5 +595,7 @@ void __stdcall runtimeHookUpdateBGOMomentum(int bgoId, int layerId);
 
 void __stdcall runtimeHookPlayerKillLava(short* playerIdxPtr);
 void __stdcall runtimeHookPlayerKillLavaSolidExit(short* playerIdxPtr);
+
+void __fastcall runtimeHookUpdateBlockAfterHit(Block* blockPtr, short oldBlockType);
 
 #endif

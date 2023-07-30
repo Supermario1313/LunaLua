@@ -2054,39 +2054,125 @@ void TrySkipPatch()
         .bytes(0x74, 0x35) // jz 0x8CDF00
         .Apply();
     
-    // main hitid patch, code from 0x9DB90E to 0x9DB984 is made unused
-    PATCH(0x9DB900)
-        .bytes(0x0F, 0xBF, 0x4B, 0x1E) // movsx ecx, word ptr [ebx + 0x1e] ; blockId
+    // hitid patch, code from 0x9db90e to 0x9db984 is made unused
+    PATCH(0x9db900)
+        .bytes(0x0f, 0xbf, 0x4b, 0x1e) // movsx ecx, word ptr [ebx + 0x1e] ; pass blockId as the first argument of Blocks::GetBlockHitId
         .CALL(Blocks::GetBlockHitId)      // call Blocks::GetBlockHitId
-        .bytes(0x0F, 0xBF, 0xF8)       // movsx edi, ax
-        .bytes(0xEB, 0x77)             // jmp 0x9DB985
-        .Apply();
-
-    // the following patch removes special hitid handling for note blocks
-    PATCH(0x9DC903)
-        .bytes(0x0f, 0x1f, 0x84, 0x00, 0x00, 0x00, 0x00, 0x00) // nop
-        .bytes(0x0f, 0x1f, 0x00) // nop
+        .bytes(0x0f, 0xbf, 0xf8)       // movsx edi, ax
+        .bytes(0xeb, 0x77)             // jmp 0x9db985
         .Apply();
     
-    std::uint32_t constexpr noteBlockHitPatchAddresses[] {
-        0x9DC9A7,
-        0x9DDA69,
-        0x9DE1B1,
-        0x9DE90D,
-        0x9DF2AC,
-        0x9DF6CA,
-        0x9DFBDE,
-        0x9E00F0,
+    // keepsizeonhit patches
+
+    // Block contains coins (1 <= contentId <= 99)
+    PATCH(0x9dc903)
+        .bytes(0x0f, 0x1f, 0x80, 0x00, 0x00, 0x00, 0x00) // nop
+        .bytes(0x66, 0x8b, 0x53, 0x1e)                   // mov dx, word ptr [ebx + 0x1e] ; pass blockId as the second argument of runtimeHookUpdateBlockAfterHit
+        .Apply();
+    
+    
+    PATCH(0x9dc923)
+        .bytes(0x89, 0xd9)                  // mov ecx, ebx                         ; pass blockPtr as the first argument of runtimeHookUpdateBlockAfterHit
+        .PUSH_IMM32(0x9e060b)              // push end                             ; push return address
+        .JMP(runtimeHookUpdateBlockAfterHit)   // jmp runtimeHookUpdateBlockAfterHit
+        .Apply();
+
+
+    // Block contains a NPC (contentId >= 1000) O
+    PATCH(0x9dc9a7)
+        .bytes(0x66, 0x66, 0x8b, 0x50, 0x1e) // mov dx, word ptr [eax + 0x1e] ; pass blockId as the second argument of runtimeHookUpdateBlockAfterHit
+        .Apply();
+    
+    PATCH(0x9dc9b2)
+        .bytes(0x66, 0x90) // nop
+        .Apply();
+
+    PATCH(0x9dc9c9)
+        .bytes(0x89, 0xc1)                // mov ecx, eax                         ; pass blockPtr as the first argument of runtimeHookUpdateBlockAfterHit
+        .PUSH_IMM32(0x9dca15)            // push updBlockEnd                     ; push return address
+        .JMP(runtimeHookUpdateBlockAfterHit) // jmp runtimeHookUpdateBlockAfterHit
+        .Apply();
+
+    // Block contains a legacy mushroom (contentId == 100)
+    PATCH(0x9dda69)
+        .bytes(0x66, 0x66, 0x8b, 0x53, 0x1e) // mov dx, word ptr [ebx + 0x1e] ; pass blockId as the second argument of runtimeHookUpdateBlockAfterHit
+        .Apply();
+    
+    PATCH(0x9dda74)
+        .bytes(0x66, 0x90) // nop
+        .Apply();
+    
+    PATCH(0x9dda8d)
+        .bytes(0x89, 0xd9)                  // mov ecx, ebx                         ; pass blockPtr (eax or ebx) as the first argument of runtimeHookUpdateBlockAfterHit
+        .PUSH_IMM32(0x9ddaca)              // push 0x9ddaca                        ; push return address
+        .JMP(runtimeHookUpdateBlockAfterHit)   // jmp runtimeHookUpdateBlockAfterHit
+        .Apply();
+
+    std::uint32_t constexpr noteBlockCheckPatchAddresses[] {
+        0x9de1b1,
+        0x9de90d,
+        0x9df2ac,
+        0x9df6ca,
+        0x9dfbde,
+        0x9e00f0,
         0
     };
 
-    for (std::uint32_t const* i = noteBlockHitPatchAddresses; *i != 0; i++) {
-        PATCH(*i)
-            .bytes(0x0F, 0x1F, 0x44, 0x00, 0x00) // nop
+    std::uint32_t constexpr updateBlockAfterHitPatchBeginAddresses[] {
+        0x9de1d5,
+        0x9de935,
+        0x9df2d0,
+        0x9df6ec,
+        0x9dfc02,
+        0x9e0114,
+    };
+
+    std::uint32_t constexpr updateBlockAfterHitPatchEndAddresses[] {
+        0x9de222,
+        0x9de982,
+        0x9df31d,
+        0x9df73b,
+        0x9dfc51,
+        0x9e0163
+    };
+
+    /* 
+     * 0 => Block contains a legacy fire flower (contentId == 102)
+     * 1 => Block contains a legacy leaf (contentId == 103)
+     * 2 => Block contains a legacy shoe (contentId == 104) ?
+     * 3 => Block contains a legacy green yoshi (contentId == 105)
+     * 4 => Block contains a legacy goomba (contentId == 101)
+     * 5 => Block contains a legacy 1-UP (contentId == 201)
+     */
+    for (std::uint32_t i = 0; noteBlockCheckPatchAddresses[i] != 0; i++) {
+
+        std::uint32_t noteBlockCheck = noteBlockCheckPatchAddresses[i];
+        std::uint32_t updBlockBegin = updateBlockAfterHitPatchBeginAddresses[i];
+        std::uint32_t updBlockEnd = updateBlockAfterHitPatchEndAddresses[i];
+
+        PATCH(noteBlockCheck)
+            .bytes(0x66, 0x66, 0x8b, 0x50, 0x1e) // mov dx, word ptr [eax + 0x1e] ; pass blockId as the second argument of runtimeHookUpdateBlockAfterHit
             .Apply();
         
-        PATCH(*i + 0xB)
+        PATCH(noteBlockCheck + 0xb)
             .bytes(0x66, 0x90) // nop
             .Apply();
+
+        PATCH(updBlockBegin)
+            .bytes(0x8b, 0x75, 0x08)          // mov esi, dword ptr [esp + 0x8]       ; restore contents of esi
+            .bytes(0x89, 0xc1)                // mov ecx, eax                         ; pass blockPtr as the first argument of runtimeHookUpdateBlockAfterHit
+            .PUSH_IMM32(updBlockEnd)         // push updBlockEnd                     ; push return address
+            .JMP(runtimeHookUpdateBlockAfterHit) // jmp runtimeHookUpdateBlockAfterHit
+            .Apply();
     }
+
+    // Additional patches for blocks containing a legacy shoe
+    PATCH(0x9df2bc)
+        .bytes(0x66, 0x90) // nop ; replaces an instruction that overwrites the second argument of runtimeHookUpdateBlockAfterHit in edx.
+        .Apply();
+    
+    PATCH(0x9df2c4)
+        .bytes(0x66, 0x89, 0x78, 0x1e) // mov word ptr [eax + 0x1e], di ; Update block id, because of the previous patch, edx no longer contains blockPtr.
+        .Apply();
+
 }

@@ -140,6 +140,7 @@ static int16_t blockprop_hitid[Block::MAX_ID + 1] = { 0 };
 static int16_t blockprop_breakable[Block::MAX_ID + 1] = { 0 };
 static int16_t blockprop_breakeffectid[Block::MAX_ID + 1] = { 0 };
 static int16_t blockprop_breaksoundid[Block::MAX_ID + 1] = { 0 };
+static Blocks::KeepSizeOnHit blockprop_keepsizeonhit[Block::MAX_ID + 1] = { Blocks::KeepSizeOnHit::NO };
 
 void Blocks::InitProperties() {
     for (int id = 1; id <= Block::MAX_ID; id++)
@@ -151,6 +152,7 @@ void Blocks::InitProperties() {
         SetBlockBreakable(id, false); // modBlocks.bas line 1286
         SetBlockBreakEffectId(id, 1); // modBlocks.bas line 901
         SetBlockBreakSoundId(id, 4); // modBlocks.bas line 893
+        SetBlockKeepSizeOnHit(id, Blocks::KeepSizeOnHit::NO);
     }
 
     // Default game config
@@ -216,6 +218,8 @@ void Blocks::InitProperties() {
 
     SetBlockBreakSoundId(186, 43);
     SetBlockBreakSoundId(526, 64);
+
+    SetBlockKeepSizeOnHit(55, Blocks::KeepSizeOnHit::YES);
 }
 
 bool Blocks::GetBlockBumpable(int id) {
@@ -276,24 +280,40 @@ void Blocks::SetBlockBreakable(int id, bool breakable)
     blockprop_breakable[id] = breakable ? -1 : 0;
 }
 
-short __fastcall Blocks::GetBlockBreakEffectId(int id) {
+short __fastcall Blocks::GetBlockBreakEffectId(int id)
+{
     if ((id < 1) || (id > Block::MAX_ID)) return 0;
     return blockprop_breakeffectid[id];
 }
 
-void Blocks::SetBlockBreakEffectId(int id, short breakEffectId) {
+void Blocks::SetBlockBreakEffectId(int id, short breakEffectId)
+{
     if ((id < 1) || (id > Block::MAX_ID)) return;
     blockprop_breakeffectid[id] = breakEffectId;
 }
 
-short __fastcall Blocks::GetBlockBreakSoundId(int id) {
+short __fastcall Blocks::GetBlockBreakSoundId(int id)
+{
     if ((id < 1) || (id > Block::MAX_ID)) return 0;
     return blockprop_breaksoundid[id];
 }
 
-void Blocks::SetBlockBreakSoundId(int id, short breakSoundId) {
+void Blocks::SetBlockBreakSoundId(int id, short breakSoundId)
+{
     if ((id < 1) || (id > Block::MAX_ID)) return;
     blockprop_breaksoundid[id] = breakSoundId;
+}
+
+Blocks::KeepSizeOnHit Blocks::GetBlockKeepSizeOnHit(int id)
+{
+    if ((id < 1) || (id > Block::MAX_ID)) return Blocks::KeepSizeOnHit::NO;
+    return blockprop_keepsizeonhit[id];
+}
+
+void Blocks::SetBlockKeepSizeOnHit(int id, Blocks::KeepSizeOnHit keepSizeOnHit)
+{
+    if ((id < 1) || (id > Block::MAX_ID)) return;
+    blockprop_keepsizeonhit[id] = keepSizeOnHit;
 }
 
 // This array should always be lexicographically sorted by property name.
@@ -303,6 +323,7 @@ static std::pair<const char*, uintptr_t> const propertyTables[] {
     std::make_pair("breaksoundid", reinterpret_cast<uintptr_t>(blockprop_breaksoundid)),
     std::make_pair("bumpable", reinterpret_cast<uintptr_t>(blockprop_bumpable)),
     std::make_pair("hitid", reinterpret_cast<uintptr_t>(blockprop_hitid)),
+    std::make_pair("keepsizeonhit", reinterpret_cast<uintptr_t>(blockprop_keepsizeonhit)),
     std::make_pair("npcfilter", reinterpret_cast<uintptr_t>(blockprop_npcfilter)),
     std::make_pair("playerfilter", reinterpret_cast<uintptr_t>(blockprop_playerfilter))
 };
