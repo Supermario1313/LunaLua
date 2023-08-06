@@ -2057,7 +2057,7 @@ void TrySkipPatch()
     // hitid patch, code from 0x9db90e to 0x9db984 is made unused
     PATCH(0x9db900)
         .bytes(0x0f, 0xbf, 0x4b, 0x1e) // movsx ecx, word ptr [ebx + 0x1e] ; pass blockId as the first argument of Blocks::GetBlockHitId
-        .CALL(Blocks::GetBlockHitId)      // call Blocks::GetBlockHitId
+        .CALL(Blocks::GetBlockHitId)   // call Blocks::GetBlockHitId
         .bytes(0x0f, 0xbf, 0xf8)       // movsx edi, ax
         .bytes(0xeb, 0x77)             // jmp 0x9db985
         .Apply();
@@ -2072,9 +2072,9 @@ void TrySkipPatch()
     
     
     PATCH(0x9dc923)
-        .bytes(0x89, 0xd9)                  // mov ecx, ebx                         ; pass blockPtr as the first argument of runtimeHookUpdateBlockAfterHit
-        .PUSH_IMM32(0x9e060b)              // push end                             ; push return address
-        .JMP(runtimeHookUpdateBlockAfterHit)   // jmp runtimeHookUpdateBlockAfterHit
+        .bytes(0x89, 0xd9)                   // mov ecx, ebx                         ; pass blockPtr as the first argument of runtimeHookUpdateBlockAfterHit
+        .PUSH_IMM32(0x9e060b)                // push end                             ; push return address
+        .JMP(runtimeHookUpdateBlockAfterHit) // jmp runtimeHookUpdateBlockAfterHit
         .Apply();
 
 
@@ -2088,8 +2088,8 @@ void TrySkipPatch()
         .Apply();
 
     PATCH(0x9dc9c9)
-        .bytes(0x89, 0xc1)                // mov ecx, eax                         ; pass blockPtr as the first argument of runtimeHookUpdateBlockAfterHit
-        .PUSH_IMM32(0x9dca15)            // push updBlockEnd                     ; push return address
+        .bytes(0x89, 0xc1)                   // mov ecx, eax                         ; pass blockPtr as the first argument of runtimeHookUpdateBlockAfterHit
+        .PUSH_IMM32(0x9dca15)                // push updBlockEnd                     ; push return address
         .JMP(runtimeHookUpdateBlockAfterHit) // jmp runtimeHookUpdateBlockAfterHit
         .Apply();
 
@@ -2103,9 +2103,9 @@ void TrySkipPatch()
         .Apply();
     
     PATCH(0x9dda8d)
-        .bytes(0x89, 0xd9)                  // mov ecx, ebx                         ; pass blockPtr (eax or ebx) as the first argument of runtimeHookUpdateBlockAfterHit
-        .PUSH_IMM32(0x9ddaca)              // push 0x9ddaca                        ; push return address
-        .JMP(runtimeHookUpdateBlockAfterHit)   // jmp runtimeHookUpdateBlockAfterHit
+        .bytes(0x89, 0xd9)                   // mov ecx, ebx                         ; pass blockPtr (eax or ebx) as the first argument of runtimeHookUpdateBlockAfterHit
+        .PUSH_IMM32(0x9ddaca)                // push 0x9ddaca                        ; push return address
+        .JMP(runtimeHookUpdateBlockAfterHit) // jmp runtimeHookUpdateBlockAfterHit
         .Apply();
 
     std::uint32_t constexpr noteBlockCheckPatchAddresses[] {
@@ -2159,9 +2159,9 @@ void TrySkipPatch()
             .Apply();
 
         PATCH(updBlockBegin)
-            .bytes(0x8b, 0x75, 0x08)          // mov esi, dword ptr [esp + 0x8]       ; restore contents of esi
-            .bytes(0x89, 0xc1)                // mov ecx, eax                         ; pass blockPtr as the first argument of runtimeHookUpdateBlockAfterHit
-            .PUSH_IMM32(updBlockEnd)         // push updBlockEnd                     ; push return address
+            .bytes(0x8b, 0x75, 0x08)             // mov esi, dword ptr [esp + 0x8]       ; restore contents of esi
+            .bytes(0x89, 0xc1)                   // mov ecx, eax                         ; pass blockPtr as the first argument of runtimeHookUpdateBlockAfterHit
+            .PUSH_IMM32(updBlockEnd)             // push updBlockEnd                     ; push return address
             .JMP(runtimeHookUpdateBlockAfterHit) // jmp runtimeHookUpdateBlockAfterHit
             .Apply();
     }
@@ -2175,4 +2175,25 @@ void TrySkipPatch()
         .bytes(0x66, 0x89, 0x78, 0x1e) // mov word ptr [eax + 0x1e], di ; Update block id, because of the previous patch, edx no longer contains blockPtr.
         .Apply();
 
+
+    // breaksoundid patch, code between 0x9e0e68 and 0x9e0eb0 is made unused
+    PATCH(0x9e0e4b)
+        .bytes(0x0f, 0xbf, 0x4c, 0xd0, 0x1e)             // movsx ecx, word ptr [eax + edx*8 + 0x1e] ; pass blockId as the first argument of GetBlockBreakSoundId
+        .CALL(Blocks::GetBlockBreakSoundId)              // call Blocks::GetBlockBreakSoundId
+        .bytes(0x66, 0x89, 0x85, 0x7c, 0xff, 0xff, 0xff) // mov word ptr [ebp - 0x84], ax            ; store the sound id to a local variable
+        .bytes(0x8d, 0x8d, 0x7c, 0xff, 0xff, 0xff)       // lea ecx, [ebp - 0x84]                    ; store the address of this local variable to ecx
+        .PUSH_ECX()                                      // push ecx                                 ; pass ecx as the first argument of PlaySound
+        .JMP(0x9e0eb1)                                   // jmp 0x9e0eb1                             ; jump to the call to PlaySound
+        .Apply();
+    
+    // breakeffectid patch, code between 0x9e0f06 and 0x9e100b is made unused
+    PATCH(0x9e0ed4)
+        .bytes(0x0f, 0xbf, 0x4c, 0xd0, 0x1e)                               // movsx ecx, word ptr [eax + edx*8 + 0x1e] ; pass blockId as the first argument of GetBlockBreakEffectId
+        .CALL(Blocks::GetBlockBreakEffectId)                               // call Blocks::GetBlockBreakEffectId
+        .bytes(0x66, 0x89, 0x85, 0x7c, 0xff, 0xff, 0xff)                   // mov word ptr [ebp - 0x84], ax            ; store effectId (first argument of NewEffect) to a local variable
+        .bytes(0xc7, 0x85, 0x70, 0xff, 0xff, 0xff, 0x00, 0x00, 0x80, 0x3f) // mov dword ptr [ebp - 0x90], 0x3f800000   ; store direction (third argument of NewEffect, default value 1.0f) to a local variable
+        .bytes(0x66, 0xc7, 0x85, 0x78, 0xff, 0xff, 0xff, 0x00, 0x00)       // mov word ptr [ebp - 0x88], 0             ; store newNpc (fourth argument of NewEffect, default value 0) to a local variable
+        .bytes(0x66, 0xc7, 0x85, 0x74, 0xff, 0xff, 0xff, 0x00, 0x00)       // mov word ptr [ebp - 0x8c], 0             ; store shadow (fifth argument of NewEffect, default value COMBOOL(false)) to a local variable
+        .JMP(0x9e100c)                                                     // jmp 0x9e100c                             ; continue NewEffect init procedure
+        .Apply();
 }
