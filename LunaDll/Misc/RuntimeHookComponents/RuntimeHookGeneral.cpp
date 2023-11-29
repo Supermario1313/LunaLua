@@ -1268,9 +1268,8 @@ void TrySkipPatch()
     *(void**)0x004010A8 = (void*)&rtcMsgBoxHook;
 
     // Add a space between /s and the argument
-    static wchar_t const fixed_regsvr32_string[] = L"regsvr32 /s ";
     PATCH(0x8BEAE9)
-        .PUSH_IMM32((std::uint32_t) &fixed_regsvr32_string)
+        .PUSH_IMM32((std::uint32_t) L"regsvr32 /s ")
         .Apply();
 }
 
